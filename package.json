@@ -1,0 +1,30 @@
+{
+  "name": "mobile-portrait-empty-template",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.26.2",
+  "description": "Renderer-neutral mobile portrait game starter",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit --pretty false",
+    "build": "pnpm run typecheck && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "matter-js": "0.20.0",
+    "three": "0.181.2"
+  },
+  "devDependencies": {
+    "sharp": "0.34.5",
+    "tsx": "4.22.4",
+    "typescript": "5.9.3",
+    "vite": "^7.2.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
+}

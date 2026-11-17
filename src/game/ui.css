@@ -1,0 +1,6184 @@
+#ui {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+  /* (The view's own size for the cqw/cqh units below: on a phone held upright the view lies turned
+     across the screen, and vw/vh would be the screen's.) */
+  container-type: size;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+  color: #fff;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#ui * {
+  box-sizing: border-box;
+}
+
+#ui img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+
+#ui .abs {
+  position: absolute;
+}
+
+#ui .hidden {
+  display: none !important;
+}
+
+/* Zero specificity so the class rules below can size and colour buttons. */
+:where(#ui button) {
+  pointer-events: auto;
+  touch-action: none;
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.stone {
+  background: linear-gradient(180deg, #8d8d8d 0%, #6f6f6f 100%);
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.35),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.38),
+    0 0 0 2px #1b1b1b;
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.stone:active,
+.stone.pressed {
+  background: linear-gradient(180deg, #5d5d5d 0%, #4c4c4c 100%);
+  box-shadow:
+    inset 3px 3px 0 rgba(0, 0, 0, 0.35),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.15),
+    0 0 0 2px #1b1b1b;
+}
+
+.panel {
+  background: rgba(18, 18, 24, 0.72);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.12),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(10, 10, 12, 0.85);
+  border-radius: 2px;
+}
+
+/* ---------------- HUD ---------------- */
+
+#hud-pause,
+#hud-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#hud-view img {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* (Its key in the lower corner, clear of the picture's head.) */
+#ui #hud-view .key {
+  left: auto;
+  top: auto;
+  right: 2px;
+  bottom: 2px;
+}
+
+#hud-pause .bars {
+  display: flex;
+  gap: 4px;
+}
+
+#hud-pause .bars span {
+  width: 5px;
+  height: 15px;
+  background: #f2f2f2;
+  box-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.meter {
+  position: relative;
+  flex: 1;
+  min-width: 30px;
+  height: 12px;
+  background: #1c1c1c;
+  box-shadow: 0 0 0 2px #0c0c0c, inset 0 2px 0 rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.meter > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(180deg, #ffe066 0%, #e0a020 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Status boards in the style of a shader-pack HUD: light dark glass, a thin rim (the world shows
+   through; the words keep their outline). */
+.hudpanel {
+  background: rgba(12, 12, 18, 0.4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(8, 8, 10, 0.45);
+  border-radius: 4px;
+  font-family: "Lucida Console", "Courier New", Menlo, monospace;
+  letter-spacing: 0.5px;
+}
+
+#hud-fort {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 7px;
+  font-size: 12px;
+  color: #f2f2f2;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#hud-fort .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#hud-fort .lab {
+  flex: none;
+}
+
+#hud-fort .lab.warn {
+  color: #ff7a6a;
+}
+
+/* (The glyphs say it on a phone; a desktop's board has the room for the words.) */
+#hud-fort .glyph {
+  display: none;
+  flex: none;
+  width: 10px;
+  height: 10px;
+}
+
+/* A phone's board: one slim line (the fortress, its power, the emeralds, the legs) with the day
+   strip a second under it, the two beside the pause button and no taller than it. */
+#ui:not(.desktop) #hud-fort,
+#ui:not(.desktop) #hud-day,
+#ui:not(.desktop) #hud-helm,
+#ui:not(.desktop) #hud-coop {
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+#ui:not(.desktop) #hud-fort {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px;
+}
+
+#ui:not(.desktop) #hud-fort .row {
+  display: contents;
+}
+
+#ui:not(.desktop) #hud-fort .name b {
+  display: none;
+}
+
+#ui:not(.desktop) #hud-fort .glyph {
+  display: block;
+}
+
+#ui:not(.desktop) #hud-fort .pw {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+#ui:not(.desktop) #hud-fort .meter {
+  flex: 1 1 auto;
+  min-width: 16px;
+  height: 6px;
+}
+
+#ui:not(.desktop) #hud-fort .val {
+  min-width: 0;
+}
+
+#ui:not(.desktop) #hud-fort .gems {
+  margin-left: 0;
+}
+
+#ui:not(.desktop) #hud-fort .legs {
+  margin-left: 0;
+  gap: 1px;
+}
+
+#ui:not(.desktop) #hud-fort .legs i {
+  width: 5px;
+  height: 8px;
+}
+
+#ui:not(.desktop) #hud-day {
+  gap: 6px;
+  padding: 0 7px;
+}
+
+#ui:not(.desktop) #hud-helm,
+#ui:not(.desktop) #hud-coop {
+  gap: 6px;
+  padding: 0 7px;
+}
+
+/* The pause button: a lighter plate on a phone (still a thumb's 44px to press). */
+#ui:not(.desktop) #hud-pause,
+#ui:not(.desktop) #hud-view {
+  opacity: 0.78;
+}
+
+#hud-fort .val {
+  flex: none;
+  min-width: 34px;
+  text-align: right;
+}
+
+#hud-fort .meter {
+  height: 8px;
+}
+
+.meter.fort > i {
+  background: linear-gradient(180deg, #7ee05a 0%, #3c9a2a 100%);
+}
+
+.meter.fort.low > i {
+  background: linear-gradient(180deg, #ff8a5a 0%, #c03a1a 100%);
+}
+
+/* The day strip under the board: "NIGHT 2 · 40%", the daylight left, where the crew walks you. */
+#hud-day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: #fff3d8;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#hud-day .when {
+  flex: none;
+}
+
+#hud-day .course {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #ffe9a8;
+}
+
+#hud-day .course svg {
+  width: 10px;
+  height: 10px;
+  flex: none;
+}
+
+#hud-day.night {
+  color: #c8d4ff;
+}
+
+#vitals {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  pointer-events: none;
+}
+
+#vitals .bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+#vitals .hearts,
+#vitals .food {
+  display: flex;
+  gap: 1px;
+}
+
+#vitals .food {
+  flex-direction: row;
+}
+
+#vitals img {
+  width: var(--icon, 15px);
+  height: var(--icon, 15px);
+}
+
+#vitals .hearts.low img {
+  animation: heart-shake 0.5s steps(2) infinite;
+}
+
+@keyframes heart-shake {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+#vitals .xp {
+  position: relative;
+  height: 9px;
+}
+
+#vitals .xpbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 2px;
+  height: 6px;
+  background: rgba(19, 22, 15, 0.55);
+  box-shadow: 0 0 0 1px rgba(5, 6, 5, 0.7);
+}
+
+#vitals .xpbar > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, #b4ff5a 0%, #58c82a 100%);
+}
+
+#vitals .xp b {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  transform: translateX(-50%);
+  /* (Its level-up glow grows upwards, inside the hearts' row.) */
+  transform-origin: 50% 100%;
+  font-size: 13px;
+  color: #8cff4a;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+
+/* A level up rises off the experience bar; its number glows. */
+.lvl-pop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  white-space: nowrap;
+  text-align: center;
+  animation: lvl-rise 2s ease-out forwards;
+}
+
+.lvl-pop b {
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #b4ff5a;
+  text-shadow: 2px 2px 0 #10200a, -1px -1px 0 #10200a, 1px -1px 0 #10200a, -1px 1px 0 #10200a, 0 0 12px rgba(140, 255, 74, 0.7);
+}
+
+.lvl-pop span {
+  padding: 2px 8px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #eaffd8;
+  background: rgba(10, 18, 8, 0.72);
+  border-radius: 4px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+@keyframes lvl-rise {
+  0% { opacity: 0; transform: translate(-50%, -70%) scale(0.6); }
+  12% { opacity: 1; transform: translate(-50%, -100%) scale(1.12); }
+  22% { transform: translate(-50%, -100%) scale(1); }
+  75% { opacity: 1; transform: translate(-50%, -150%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -175%) scale(1); }
+}
+
+#vitals.lvl .xp b {
+  animation: lvl-glow 1.4s ease-out;
+}
+
+@keyframes lvl-glow {
+  0%, 30% { color: #ffffff; transform: translateX(-50%) scale(1.6); text-shadow: 0 0 10px #b4ff5a, 1px 1px 0 #000; }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+#prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-family: "Lucida Console", "Courier New", Menlo, monospace;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #ffffff;
+  background: rgba(14, 14, 20, 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#prompt .pk {
+  display: none;
+  font-style: normal;
+  min-width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  background: #2b2b32;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 0 #0d0d10;
+  border-radius: 3px;
+}
+
+#ui.desktop #prompt .pk {
+  display: inline-block;
+}
+
+#ui:not(.desktop) #prompt.long {
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+}
+
+#ui:not(.desktop) #prompt.long span {
+  line-height: 1.1;
+}
+
+#ui:not(.desktop) #prompt.long span {
+  white-space: normal;
+  line-height: 1.12;
+  text-align: center;
+}
+
+/* A phone's action button: gold glass, as wide as its words, lit brighter under the thumb. */
+#ui:not(.desktop) #prompt {
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  padding: 0 11px;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 #3a2400, 0 0 3px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, rgba(228, 172, 44, 0.74) 0%, rgba(160, 104, 14, 0.74) 100%);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 236, 160, 0.75),
+    0 0 0 1px rgba(27, 27, 27, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+#ui:not(.desktop):not(.craning) #prompt {
+  animation: prompt-in 0.22s ease-out;
+}
+
+#ui:not(.desktop) #prompt:active {
+  background: linear-gradient(180deg, rgba(255, 204, 80, 0.92) 0%, rgba(196, 132, 24, 0.92) 100%);
+  transform: scale(0.96);
+}
+
+@keyframes prompt-in {
+  0% { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* How the controls go right now (at the helm, on a giant): one quiet line of glass. */
+#hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px 10px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #fff7d6;
+  text-shadow: 1px 1px 0 #1a1a1a;
+  overflow: hidden;
+}
+
+#ui.desktop #hint {
+  font-size: 14px;
+}
+
+#ui:not(.desktop) #hint {
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+/* ---------------- toasts & banners ---------------- */
+
+#toasts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 6px;
+  font-size: 13px;
+  line-height: 1.25;
+  border-radius: 4px;
+  background: rgba(14, 14, 18, 0.66);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+  text-shadow: 1px 1px 0 #000;
+  animation: toast-in 2.4s ease forwards;
+  max-width: 100%;
+}
+
+/* Picked-up items: quieter, they come in runs. */
+.toast.pickup {
+  padding: 2px 9px 2px 5px;
+  font-size: 12px;
+  color: #e8f4d8;
+  background: rgba(14, 14, 18, 0.5);
+}
+
+.toast img {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.toast.pickup img {
+  width: 16px;
+  height: 16px;
+}
+
+/* What is in hand: its name in gold over what it is for (renewed in place as the hotbar is flicked). */
+.toast.held {
+  align-items: flex-start;
+  padding: 5px 10px 5px 6px;
+  border-left: 3px solid rgba(255, 210, 58, 0.9);
+  background: rgba(14, 14, 18, 0.74);
+  animation-duration: 3.4s;
+}
+
+.toast.held img {
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  image-rendering: pixelated;
+}
+
+.toast.held span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.toast.held b {
+  color: #ffd84a;
+  font-size: 13px;
+}
+
+.toast.held small {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: #e8e2cc;
+}
+
+/* Lying sideways the news column runs down to the stick: one line of use, cut short. */
+#ui.wide:not(.desktop) .toast.held small {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#ui.wide:not(.desktop) .toast.held img {
+  width: 22px;
+  height: 22px;
+}
+
+@keyframes toast-in {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+#banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  /* Hidden unless announcing: the old banner must not snap back once its animation is removed. */
+  opacity: 0;
+}
+
+#banner .title {
+  font-size: 30px;
+  letter-spacing: 2px;
+  line-height: 1.05;
+  text-shadow: 3px 3px 0 #1a1a1a, -1px -1px 0 #1a1a1a;
+}
+
+#banner .sub {
+  margin-top: 6px;
+  padding: 0 10px;
+  font-size: 16px;
+  line-height: 1.3;
+  text-shadow: 2px 2px 0 #1a1a1a;
+  color: #f4f4f4;
+}
+
+#banner.day .title { color: #ffe066; }
+#banner.night .title { color: #a8b8ff; }
+#banner.danger .title { color: #ff6a50; }
+#banner.gold .title { color: #ffd23a; }
+
+#banner.show {
+  animation: banner-in 2.6s ease forwards;
+}
+
+@keyframes banner-in {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------------- controls ---------------- */
+
+.ctl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.ctl svg {
+  width: 56%;
+  height: 56%;
+  filter: drop-shadow(2px 2px 0 #2a2a2a);
+}
+
+.stick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22%;
+  background: rgba(18, 18, 24, 0.42);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 0 0 2px rgba(10, 10, 12, 0.75);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.stick .knob {
+  width: 44%;
+  height: 44%;
+  background: linear-gradient(180deg, #8d8d8d 0%, #6f6f6f 100%);
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.35),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.38),
+    0 0 0 2px #1b1b1b;
+  pointer-events: none;
+}
+
+.stick.pressed .knob {
+  background: linear-gradient(180deg, #a8a8a8 0%, #888888 100%);
+}
+
+#crosshair {
+  pointer-events: none;
+}
+
+#crosshair::before,
+#crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+
+#crosshair::before {
+  left: 10px;
+  top: 2px;
+  width: 2px;
+  height: 18px;
+}
+
+#crosshair::after {
+  left: 2px;
+  top: 10px;
+  width: 18px;
+  height: 2px;
+}
+
+/* A monster within a blow: the crosshair turns red and opens a touch. */
+#crosshair.foe::before,
+#crosshair.foe::after {
+  background: rgba(255, 70, 50, 0.95);
+}
+
+#crosshair.foe {
+  transform: scale(1.18);
+  transition: transform 0.08s ease-out;
+}
+
+#hotbar {
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.slot {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 24, 28, 0.5);
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 2px rgba(18, 18, 18, 0.75);
+}
+
+.slot img {
+  width: 64%;
+  height: 64%;
+}
+
+.slot .count {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000;
+}
+
+.slot.active {
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.35),
+    0 0 0 3px #ffffff,
+    0 0 0 5px rgba(26, 26, 26, 0.8);
+  background: rgba(70, 70, 76, 0.66);
+}
+
+.slot.empty {
+  opacity: 0.45;
+}
+
+.slot.craft {
+  background: linear-gradient(180deg, #a77a45 0%, #7a5530 100%);
+}
+
+.ctx-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.ctx-btn img {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+.ctx-btn span {
+  line-height: 14px;
+  white-space: nowrap;
+}
+
+.ctx-btn.fire {
+  background: linear-gradient(180deg, #e2492f 0%, #a02212 100%);
+}
+
+.ctx-btn.leap {
+  background: linear-gradient(180deg, #e7b72e 0%, #a87610 100%);
+}
+
+.ctx-btn.march {
+  background: linear-gradient(180deg, #5a68c8 0%, #2c3488 100%);
+}
+
+.ctx-btn.map {
+  background: linear-gradient(180deg, #b08a4a 0%, #7a5a2a 100%);
+}
+
+.ctx-btn.disabled {
+  filter: grayscale(0.85) brightness(0.8);
+}
+
+/* Keyboard badges: only meaningful (and only shown) with the desktop control scheme. */
+#ui .key {
+  display: none;
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  min-width: 14px;
+  padding: 0 3px;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+  color: #fff7d6;
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+#ui.desktop .key {
+  display: block;
+}
+
+/* ---------------- overlays ---------------- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: radial-gradient(ellipse at 50% 70%, #3a2440 0%, #141022 55%, #0a0812 100%);
+  font-size: 14px;
+  color: #d8d8d8;
+}
+
+#loading .loading-title {
+  font-size: 26px;
+  letter-spacing: 3px;
+  color: #ffd23a;
+  text-shadow: 3px 3px 0 #2a1a08;
+}
+
+#loading .loading-text {
+  font-size: 15px;
+  color: #e8dcc8;
+}
+
+#loading .meter {
+  flex: none;
+  width: 60%;
+  max-width: 240px;
+}
+
+/* Once the title's art and logo are in, the loading screen wears them too. */
+#loading.art-in {
+  background: linear-gradient(180deg, rgba(8, 12, 24, 0.66) 0%, rgba(8, 12, 24, 0.82) 100%), var(--art) 50% 30% / cover no-repeat, #141022;
+}
+
+#loading .loading-logo {
+  display: none;
+  width: min(78%, 340px);
+  height: auto;
+  image-rendering: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+
+#loading.logo-in .loading-logo {
+  display: block;
+}
+
+#loading.logo-in .loading-title {
+  display: none;
+}
+
+.big-btn {
+  min-height: 56px;
+  width: 78%;
+  max-width: 300px;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.big-btn.green {
+  background: linear-gradient(180deg, #74b84a 0%, #4a8a2a 100%);
+}
+
+.big-btn.small {
+  min-height: 46px;
+  font-size: 16px;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 6, 12, 0.66);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  background: #c6c6c6;
+  color: #3a3a3a;
+  box-shadow:
+    inset 3px 3px 0 #ffffff,
+    inset -3px -3px 0 #555555,
+    0 0 0 3px #111;
+  overflow: hidden;
+}
+
+.modal h2 {
+  margin: 0;
+  padding: 10px 12px 6px;
+  font-size: 20px;
+  color: #3a3a3a;
+  letter-spacing: 1px;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal .close {
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  color: #fff;
+  flex: none;
+}
+
+.modal .scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding: 0 10px 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Let a drag that starts on a recipe button still scroll the list. */
+.modal .scroll button {
+  touch-action: pan-y;
+}
+
+/* (A view turned across an upright screen: its lists run along the screen's other axis.) */
+.surface-turned .modal .scroll,
+.surface-turned .modal .scroll button,
+.surface-turned #map-modal .atlas {
+  touch-action: pan-x pan-y;
+}
+
+.stations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 8px;
+  font-size: 13px;
+}
+
+.stations span {
+  padding: 3px 6px;
+  background: #8b8b8b;
+  color: #fff;
+  text-shadow: 1px 1px 0 #333;
+}
+
+.stations span.on {
+  background: #4f8a31;
+}
+
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.inv-grid .slot {
+  width: 100%;
+  aspect-ratio: 1;
+  pointer-events: auto;
+}
+
+.inv-grid .slot.picked {
+  box-shadow: inset 0 0 0 2px #ffd84a;
+}
+
+/* A tapped material: what it is, what it is for, what it goes into. */
+.inv-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: -4px 0 10px;
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: rgba(10, 10, 12, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(226, 178, 74, 0.45);
+}
+
+.inv-info.hidden {
+  display: none;
+}
+
+.inv-info img {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.inv-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.inv-info b {
+  color: #ffd84a;
+  font-size: 14px;
+}
+
+.inv-info b i {
+  font-style: normal;
+  color: #e8e2cc;
+  font-weight: normal;
+}
+
+.inv-info small {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #ece6d2;
+}
+
+.inv-info small.makes {
+  color: #b9d99a;
+}
+
+.inv-info small.makes em {
+  font-style: normal;
+  font-weight: bold;
+  margin-right: 4px;
+  color: #8fc36a;
+}
+
+.section-label {
+  font-size: 13px;
+  margin: 6px 0 4px;
+  color: #4a4a4a;
+}
+
+.trade-note {
+  margin: 0 0 6px;
+  padding: 7px 9px;
+  font-size: 14px;
+  line-height: 1.3;
+  color: #fff;
+  background: #3f8a2a;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.25), inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 0 #1a3a10;
+  animation: note-in 0.3s ease-out;
+}
+
+.trade-note.bad {
+  background: #9a3a2a;
+  text-shadow: 1px 1px 0 #3a1008;
+}
+
+@keyframes note-in {
+  0% { transform: scale(0.96); filter: brightness(1.6); }
+  100% { transform: none; filter: none; }
+}
+
+.recipe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 6px;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+  color: #fff;
+  text-shadow: 1px 1px 0 #333;
+}
+
+.recipe .out {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6f6f6f;
+  box-shadow: inset 2px 2px 0 #373737;
+}
+
+.recipe .out img {
+  width: 32px;
+  height: 32px;
+}
+
+.recipe .out b {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.recipe .info {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.recipe .info small {
+  display: block;
+  font-size: 13px;
+  color: #f0f0f0;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.recipe .needs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+.recipe .needs span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.recipe .needs img {
+  width: 16px;
+  height: 16px;
+}
+
+.recipe .needs .lack {
+  color: #ffb0a8;
+}
+
+.recipe .craft-btn {
+  width: 72px;
+  min-height: 44px;
+  font-size: 14px;
+  flex: none;
+  color: #fff;
+}
+
+.recipe .craft-btn.off {
+  filter: grayscale(1) brightness(0.85);
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 14px 14px;
+  align-items: center;
+}
+
+.menu-list .big-btn {
+  width: 100%;
+  color: #fff;
+}
+
+.menu-list > .section-label {
+  width: 100%;
+  max-width: 300px;
+  margin: 2px 0 -3px;
+}
+
+/* The pause menu keeps close-set, so all of it fits a phone's screen. */
+#pause-modal .menu-list {
+  gap: 7px;
+  padding-top: 2px;
+  padding-bottom: 10px;
+}
+
+/* Two short buttons side by side (as wide as the buttons above and below them). */
+.menu-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.menu-pair .big-btn {
+  min-width: 0;
+  padding: 0 6px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* An odd tile out spans the row. */
+.menu-grid > .setting:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* The pause menu's settings: two columns of tiles, the setting's name over its value. */
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.menu-grid .big-btn.setting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 3px 6px;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.setting small,
+.setting b {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: center;
+}
+
+.setting small {
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.82;
+}
+
+.setting b {
+  font-size: 15px;
+}
+
+.help {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #3a3a3a;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.result-title {
+  text-align: center;
+  font-size: 28px;
+  padding: 14px 10px 4px;
+  letter-spacing: 2px;
+}
+
+.result-title.victory {
+  color: #2f7a1a;
+}
+
+.result-title.defeat {
+  color: #a01a10;
+}
+
+.result-sub {
+  text-align: center;
+  font-size: 15px;
+  padding: 0 12px 8px;
+  color: #4a4a4a;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 0 18px 10px;
+  font-size: 15px;
+}
+
+.stats-grid b {
+  text-align: right;
+}
+
+/* ---------------- story: relic cards, journal pages, the journal, the prologue ---------------- */
+
+.story-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px 14px;
+  pointer-events: auto;
+  overflow-y: auto;
+  text-align: center;
+  animation: card-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes card-in {
+  0% { transform: scale(0.82); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.story-card.relic {
+  background: radial-gradient(ellipse at 50% 18%, #3a3226 0%, #1c1812 70%);
+  color: #f2e6c8;
+  box-shadow:
+    inset 0 0 0 2px #d8a83a,
+    inset 0 0 0 4px #4a3818,
+    0 0 0 3px #0e0b06,
+    0 0 40px rgba(255, 196, 80, 0.35);
+}
+
+.story-card.page {
+  background: linear-gradient(180deg, #ecdcae 0%, #d8c08a 100%);
+  color: #3e2a14;
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.45),
+    inset -3px -3px 0 rgba(90, 60, 20, 0.45),
+    0 0 0 3px #2a1a0a;
+}
+
+/* The saga's great moments: a tall picture with its line under it. */
+.story-card.saga {
+  padding: 0 0 12px;
+  background: #0c0f0c;
+  color: #f2ecd8;
+  box-shadow:
+    inset 0 0 0 2px #d8a83a,
+    0 0 0 3px #0a0a06,
+    0 0 40px rgba(255, 196, 80, 0.25);
+}
+
+.story-card .sc-tall {
+  width: 100%;
+  max-height: min(62vh, 480px);
+  max-height: min(62cqh, 480px);
+  object-fit: cover;
+  display: block;
+  background: #10201a;
+}
+
+.story-card.saga .sc-story {
+  padding: 4px 16px 2px;
+}
+
+.story-card.saga .big-btn {
+  width: calc(100% - 32px);
+}
+
+/* An officer speaks: a square portrait, their name, a line. */
+.story-card.talk {
+  background: radial-gradient(ellipse at 50% 12%, #33291c 0%, #16120c 74%);
+  color: #f2e6c8;
+  box-shadow:
+    inset 0 0 0 2px #b8913f,
+    inset 0 0 0 4px #3a2c14,
+    0 0 0 3px #0e0b06,
+    0 0 34px rgba(255, 196, 80, 0.22);
+}
+
+.story-card .sc-face {
+  width: min(62%, 190px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px #0e0b06, 0 0 0 4px #b8913f;
+}
+
+.story-card .sc-curio {
+  width: 112px;
+  height: 112px;
+  filter: drop-shadow(0 4px 10px rgba(255, 200, 90, 0.35));
+}
+
+/* A new land's chapter card: its picture across the top, green and gold like the seals. */
+.story-card.chapter {
+  background: radial-gradient(ellipse at 50% 30%, #1f3426 0%, #0f1a13 72%);
+  color: #e6f2e2;
+  box-shadow:
+    inset 0 0 0 2px #7fe0a0,
+    inset 0 0 0 4px #1a3a24,
+    0 0 0 3px #060d08,
+    0 0 40px rgba(80, 255, 140, 0.25);
+}
+
+.story-card.chapter .sc-head {
+  color: #9ff0b8;
+}
+
+.story-card .sc-art {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px #060d08, 0 0 0 4px #4a8a5a;
+  background: #10201a;
+}
+
+.story-card.chapter .sc-name {
+  color: #ffe08a;
+  margin-top: 2px;
+}
+
+.story-card.chapter .sc-use {
+  box-shadow: inset 0 0 0 1px rgba(127, 224, 160, 0.5);
+}
+
+.story-card.chapter .sc-use b {
+  color: #9ff0b8;
+}
+
+.story-card.chapter .sc-note {
+  color: #b8e8c4;
+  font-weight: 700;
+}
+
+.story-card .sc-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #ffd25a;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.story-card.page .sc-head {
+  color: #6a4a1e;
+  text-shadow: none;
+}
+
+.story-card .sc-head img {
+  width: 18px;
+  height: 18px;
+}
+
+.story-card .sc-icon {
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(255, 210, 100, 0.45) 0%, rgba(255, 210, 100, 0) 68%);
+  animation: relic-glow 2.2s ease-in-out infinite;
+}
+
+.story-card .sc-icon img {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+@keyframes relic-glow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.story-card .sc-name {
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #ffe08a;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.story-card .sc-from {
+  font-size: 13px;
+  color: #c8b890;
+  margin-top: -4px;
+}
+
+.story-card .sc-story {
+  font-size: 15px;
+  line-height: 1.4;
+  font-style: italic;
+  font-weight: 700;
+  color: #e8dcc0;
+  padding: 2px 4px;
+}
+
+.story-card .sc-use {
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(216, 168, 58, 0.5);
+  color: #fff;
+}
+
+.story-card .sc-use b {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #ffd25a;
+  margin-bottom: 2px;
+}
+
+.story-card .sc-title {
+  font-size: 22px;
+  color: #3a220c;
+  letter-spacing: 1px;
+}
+
+.story-card .sc-text {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+  font-style: italic;
+  color: #4a3216;
+  padding: 2px 6px 4px;
+}
+
+.story-card .sc-note {
+  font-size: 12px;
+  color: #7a5a2a;
+}
+
+.story-card.relic .sc-note {
+  color: #d8bf7e;
+}
+
+.story-card .big-btn {
+  width: 100%;
+  margin-top: 4px;
+  color: #fff;
+}
+
+/* A phone lying sideways: the picture stands beside the words. */
+.story-card.lying:not(.page) {
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  grid-auto-rows: auto;
+  column-gap: 14px;
+  row-gap: 4px;
+  align-content: center;
+  align-items: center;
+  justify-items: center;
+  padding: 10px 14px;
+}
+
+.story-card.lying:not(.page) > * {
+  grid-column: 2;
+}
+
+.story-card.lying:not(.page) > .sc-art,
+.story-card.lying:not(.page) > .sc-tall,
+.story-card.lying:not(.page) > .sc-face,
+.story-card.lying:not(.page) > .sc-curio,
+.story-card.lying:not(.page) > .sc-icon {
+  grid-column: 1;
+  grid-row: 1 / span 7;
+  max-height: calc(100dvh - 44px);
+  max-height: calc(100cqh - 44px);
+}
+
+.story-card.lying .sc-face {
+  width: 100%;
+  max-width: 220px;
+}
+
+.story-card.lying .sc-art {
+  aspect-ratio: 3 / 2;
+}
+
+.story-card.lying.saga {
+  padding: 8px 10px;
+  grid-template-rows: 1fr auto auto 1fr;
+}
+
+.story-card.lying.saga > .sc-tall {
+  grid-row: 1 / -1;
+}
+
+.story-card.lying.saga > .sc-story {
+  grid-row: 2;
+}
+
+.story-card.lying.saga > .big-btn {
+  grid-row: 3;
+}
+
+.story-card.lying .sc-tall {
+  height: calc(100dvh - 44px);
+  height: calc(100cqh - 44px);
+  width: 100%;
+}
+
+.story-card.lying.saga .sc-story {
+  padding: 0;
+}
+
+.story-card.lying.saga .big-btn {
+  width: 100%;
+}
+
+.story-card.lying .sc-story,
+.story-card.lying .sc-use,
+.story-card.lying .sc-note {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.story-card.lying .sc-use {
+  width: 100%;
+  padding: 5px 9px;
+}
+
+.story-card.lying .big-btn {
+  min-height: 44px;
+  height: 44px;
+  margin-top: 2px;
+}
+
+#journal-modal {
+  background: linear-gradient(180deg, #e8d6a6 0%, #d4bc86 100%);
+  color: #3e2a14;
+}
+
+#journal-modal h2 {
+  color: #4a2e10;
+}
+
+#journal-modal .section-label {
+  color: #6a4a1e;
+}
+
+.jr-relic {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px;
+  margin-bottom: 4px;
+  background: rgba(70, 44, 14, 0.12);
+}
+
+.jr-relic img {
+  width: 36px;
+  height: 36px;
+  flex: none;
+}
+
+.jr-relic b {
+  display: block;
+  font-size: 15px;
+  color: #3a220c;
+}
+
+.jr-relic small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #5a4020;
+}
+
+.jr-relic.missing {
+  opacity: 0.55;
+}
+
+.jr-relic.missing img {
+  filter: grayscale(1);
+}
+
+.jr-page {
+  padding: 6px 4px 8px;
+  border-bottom: 1px dashed rgba(90, 60, 20, 0.35);
+}
+
+.jr-page b {
+  font-size: 15px;
+  color: #3a220c;
+}
+
+.jr-page p {
+  margin: 3px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 700;
+  font-style: italic;
+  color: #4a3216;
+}
+
+.jr-page.missing b {
+  color: rgba(90, 60, 20, 0.5);
+}
+
+/* The seven lands, each with its picture once entered. */
+.jr-lands {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.jr-land {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: #3a220c;
+  background: rgba(70, 44, 14, 0.14);
+  cursor: pointer;
+}
+
+.jr-land img {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(40, 24, 8, 0.6);
+}
+
+.jr-land b {
+  font-size: 13px;
+}
+
+.jr-land small {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #5a4020;
+}
+
+.jr-land.missing {
+  cursor: default;
+  justify-content: center;
+  min-height: 64px;
+  opacity: 0.55;
+}
+
+/* The trader speaks first. */
+.elder {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 2px 0 6px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.elder img {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.elder p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  font-style: italic;
+  font-weight: 700;
+  color: #3a3a3a;
+}
+
+/* The wandering trader's picture, over his wares. */
+.wander-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  margin: 0 0 6px;
+  box-shadow: 0 0 0 2px #2a1a0a;
+  background: #3a2a18;
+}
+
+.ctx-btn.horn {
+  background: linear-gradient(180deg, #c89a48 0%, #8a5e1e 100%);
+}
+
+.ctx-btn.horn img {
+  animation: relic-glow 1.6s ease-in-out infinite;
+}
+
+/* The prologue: full-bleed art, a typed line at the foot, SKIP in the corner. */
+#prologue {
+  z-index: 40;
+  background: #000;
+  pointer-events: auto;
+  touch-action: none;
+  overflow: hidden;
+}
+
+#prologue .pro-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+  opacity: 0;
+}
+
+#prologue .pro-art.in {
+  animation: pro-in 7s ease-out forwards;
+}
+
+@keyframes pro-in {
+  0% { opacity: 0; transform: scale(1.08); }
+  12% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+#prologue .pro-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.88) 82%);
+  pointer-events: none;
+}
+
+#prologue .pro-text {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + var(--surface-viewport-safe-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(92%, 520px);
+  color: #f4ead2;
+  text-align: left;
+}
+
+#prologue .pro-text p {
+  min-height: 4.5em;
+  margin: 0 0 12px;
+  font-size: 19px;
+  line-height: 1.45;
+  text-shadow: 2px 2px 0 #000, 0 0 12px rgba(0, 0, 0, 0.8);
+}
+
+#prologue .pro-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #d8c89c;
+}
+
+#prologue .pro-dots i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#prologue .pro-dots i.on {
+  background: #ffd25a;
+}
+
+#prologue .pro-next {
+  animation: blink 1.2s steps(2) infinite;
+}
+
+#prologue .pro-skip {
+  position: absolute;
+  left: calc(12px + var(--surface-viewport-safe-left, 0px));
+  top: calc(12px + var(--surface-viewport-safe-top, 0px));
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #fff;
+}
+
+/* Victory: the Citadel falls in the picture above the tally. */
+#result-modal .result-art {
+  display: block;
+  width: calc(100% - 14px);
+  height: clamp(120px, 28vh, 260px);
+  height: clamp(120px, 28cqh, 260px);
+  margin: 7px 7px 0;
+  object-fit: cover;
+  object-position: 50% 58%;
+  image-rendering: auto;
+  /* The picture fades into the panel, the title over its foot. */
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 62%, transparent 100%);
+}
+
+#result-modal .result-art + .result-title {
+  position: relative;
+  margin-top: -46px;
+}
+
+.result-epilogue {
+  margin: 0 14px 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  font-style: italic;
+  font-weight: 700;
+  color: #4a3216;
+  background: linear-gradient(180deg, #ecdcae 0%, #d8c08a 100%);
+}
+
+.result-epilogue b {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #6a4a1e;
+}
+
+/* ---------------- narrow / short safe area (small or rotated screens) ---------------- */
+
+#ui.narrow #hud-phase {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+}
+
+#ui.narrow #hud-phase img {
+  display: none;
+}
+
+#ui.narrow #hud-phase .label {
+  text-align: center;
+}
+
+#ui.narrow #hud-phase .meter {
+  flex: none;
+  height: 8px;
+}
+
+#ui.narrow #hud-stats {
+  gap: 6px;
+  padding: 0 6px;
+}
+
+#ui.narrow #hint {
+  font-size: 13px;
+  padding: 4px 8px;
+}
+
+#ui.narrow #banner .title {
+  font-size: 24px;
+}
+
+#ui.narrow #banner .sub {
+  font-size: 12px;
+}
+
+#ui.narrow .big-btn {
+  width: 100%;
+}
+
+#ui.narrow .modal h2 {
+  font-size: 15px;
+  letter-spacing: 0;
+  padding: 8px 8px 6px 10px;
+}
+
+#ui.narrow .recipe {
+  flex-wrap: wrap;
+}
+
+#ui.narrow .recipe .info {
+  flex-basis: calc(100% - 52px);
+}
+
+#ui.narrow .recipe .craft-btn {
+  width: 100%;
+}
+
+#ui.short #pause-modal .help {
+  display: none;
+}
+
+#ui.short .result-title {
+  font-size: 20px;
+  letter-spacing: 1px;
+  padding: 10px 8px 2px;
+}
+
+#ui.short .result-sub {
+  font-size: 12px;
+  padding: 0 8px 6px;
+}
+
+#ui.short .stats-grid {
+  font-size: 12px;
+  gap: 2px 8px;
+  padding: 0 12px 8px;
+}
+
+#ui.short .stats-grid .minor {
+  display: none;
+}
+
+#ui.short .menu-list {
+  gap: 8px;
+  padding: 4px 12px 12px;
+}
+
+#ui.short .big-btn {
+  min-height: 48px;
+  font-size: 18px;
+}
+
+#ui.short .big-btn.small {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+/* ---------------- map ---------------- */
+
+#map-modal .map-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#map-modal.lying .map-body {
+  flex-direction: row;
+}
+
+#map-modal .map-side {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#map-modal .map-wrap {
+  position: relative;
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+#map-modal .map-tools {
+  position: absolute;
+  right: 16px;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#map-modal .map-tools button {
+  width: 42px;
+  height: 42px;
+  font-size: 22px;
+  line-height: 1;
+  color: #fff;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#map-modal .map-tools button img {
+  width: 28px;
+  height: 28px;
+}
+
+#map-modal .atlas {
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  background: #cdb88c;
+  box-shadow: inset 0 0 0 2px #373737, 0 0 0 2px #555;
+}
+
+#map-modal .at-inner {
+  position: relative;
+  height: 100%;
+  min-width: 100%;
+  aspect-ratio: 1376 / 768;
+}
+
+#map-modal .atlas .at-map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  image-rendering: auto;
+}
+
+#map-modal .at-lands span {
+  position: absolute;
+  bottom: 3px;
+  transform: translateX(-50%);
+  max-width: 13%;
+  font-size: 9px;
+  line-height: 1.05;
+  font-weight: 800;
+  text-align: center;
+  color: #fff3d8;
+  text-shadow: 1px 1px 0 #000, -1px 0 0 #000, 0 -1px 0 #000;
+}
+
+#map-modal .at-mark {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+}
+
+#map-modal .at-mark.won {
+  filter: drop-shadow(0 0 4px #ffe070);
+}
+
+#map-modal .at-mark img {
+  width: 100%;
+  height: 100%;
+}
+
+#map-modal .at-you {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: #ff5a3a;
+  box-shadow: 0 0 0 2px #fff, 0 0 8px 3px rgba(255, 90, 58, 0.7);
+  animation: at-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes at-pulse {
+  50% { transform: scale(1.3); }
+}
+
+#map-modal canvas.map {
+  display: block;
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 2px #373737, 0 0 0 2px #555;
+  background: #2a3a20;
+}
+
+#map-modal .march-strip {
+  padding: 8px 18px 0;
+}
+
+#map-modal .ms-bar {
+  position: relative;
+  height: 16px;
+  background: #2a2a2e;
+  box-shadow: inset 0 0 0 2px #373737;
+}
+
+#map-modal .ms-land {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  overflow: hidden;
+}
+
+#map-modal .ms-land span {
+  font: 800 10px Verdana, sans-serif;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+#map-modal .ms-land.green { background: #6cae44; }
+#map-modal .ms-land.desert { background: #dcc684; }
+#map-modal .ms-land.swamp { background: #4f6e3c; }
+#map-modal .ms-land.badlands { background: #c4703c; }
+#map-modal .ms-land.snow { background: #e8eef4; }
+#map-modal .ms-land.ember { background: #4a3c3e; box-shadow: inset 0 -3px 0 #e2601e; }
+#map-modal .ms-land.ember span { color: rgba(255, 220, 190, 0.7); }
+#map-modal .ms-land.blight { background: #6a527a; }
+#map-modal .ms-land.fog { filter: grayscale(1) brightness(0.5); }
+
+#map-modal .ms-seal,
+#map-modal .ms-citadel {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+}
+
+#map-modal .ms-seal {
+  transform: rotate(45deg);
+  background: #5cff9a;
+  box-shadow: 0 0 0 2px #0a3a1a;
+}
+
+#map-modal .ms-seal.broken {
+  background: #7d8a82;
+  box-shadow: 0 0 0 2px #3a3f3c;
+}
+
+#map-modal .ms-citadel {
+  left: 100%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: #40ff60;
+  box-shadow: 0 0 0 2px #0a2a10;
+}
+
+#map-modal .ms-you {
+  position: absolute;
+  top: -8px;
+  width: 0;
+  height: 0;
+  margin-left: -6px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid #ff5a3a;
+  filter: drop-shadow(0 0 1px #fff);
+}
+
+#map-modal .ms-note {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #3a3a3a;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#map-modal .map-status {
+  padding: 8px 12px 6px;
+  font-size: 15px;
+  color: #3a3a3a;
+}
+
+.dest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+  color: #fff;
+  text-shadow: 1px 1px 0 #333;
+}
+
+.dest .info {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+}
+
+.dest .info small {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+.dest.village .info b { color: #ffe9a8; }
+.dest.castle .info b { color: #e8d8ff; }
+.dest.citadel .info b { color: #a8ffb8; }
+
+.dest .dest-btn {
+  width: 96px;
+  min-height: 44px;
+  font-size: 14px;
+  color: #fff;
+  flex: none;
+  background: linear-gradient(180deg, #5a68c8 0%, #2c3488 100%);
+}
+
+.dest .dest-btn.off {
+  filter: grayscale(0.6) brightness(0.9);
+}
+
+/* ---------------- helm ---------------- */
+
+#hud-helm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: #fff3d8;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#hud-helm b {
+  color: #ffd23a;
+}
+
+#hud-helm .course {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#hud-helm svg {
+  width: 10px;
+  height: 10px;
+  flex: none;
+}
+
+#hud-helm .course .cn {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#hud-helm .course .cd {
+  flex: none;
+}
+
+/* (A phone held sideways: the strip is the helm's by its compass and its boiler.) */
+#ui.short:not(.desktop) #hud-helm > b {
+  display: none;
+}
+
+#hud-helm .warn {
+  color: #ff7a6a;
+}
+
+.stick.drive {
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 210, 58, 0.7),
+    0 0 0 2px rgba(10, 10, 12, 0.75);
+}
+
+.stick.drive .knob {
+  background: linear-gradient(180deg, #e0b040 0%, #a87818 100%);
+}
+
+/* ---------------- night war ---------------- */
+
+#hud-fort .legs {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+#hud-fort .legs i {
+  display: inline-block;
+  width: 7px;
+  height: 9px;
+  margin-left: 1px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+#hud-fort .legs i.ok { background: #6fd04a; }
+#hud-fort .legs i.warn { background: #f0b030; }
+#hud-fort .legs i.bad { background: #e0402a; animation: blink 0.6s steps(2) infinite; }
+
+@keyframes blink {
+  50% { opacity: 0.35; }
+}
+
+#hud-day.blood {
+  color: #ff9a8a;
+  box-shadow: inset 0 0 0 1px rgba(255, 80, 60, 0.5), 0 0 0 2px rgba(8, 8, 10, 0.75);
+}
+
+#hitmark {
+  pointer-events: none;
+  opacity: 0;
+}
+
+#hitmark i {
+  position: absolute;
+  left: 13px;
+  top: 2px;
+  width: 2px;
+  height: 8px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+  transform-origin: 1px 12px;
+}
+
+#hitmark i:nth-child(1) { transform: rotate(45deg); }
+#hitmark i:nth-child(2) { transform: rotate(135deg); }
+#hitmark i:nth-child(3) { transform: rotate(225deg); }
+#hitmark i:nth-child(4) { transform: rotate(315deg); }
+#hitmark.kill i { background: #ff4a3a; }
+
+#hitmark.show {
+  animation: hitflash 0.3s ease-out;
+}
+
+@keyframes hitflash {
+  0% { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+#threats {
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.threat {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+}
+
+.threat svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* (An outline drawn with the arrow, not a filter redone every frame as it moves.) */
+.threat polygon {
+  stroke: rgba(0, 0, 0, 0.85);
+  stroke-width: 0.9px;
+  stroke-linejoin: round;
+}
+
+.threat.giant polygon { fill: #ff4a3a; }
+.threat.phantom polygon { fill: #b08cff; }
+.threat.climber polygon { fill: #ffb030; }
+
+.threat span {
+  display: none;
+}
+
+/* A giant in view: a lock-on bracket and its range. */
+.threat.lock {
+  width: 34px;
+  height: 34px;
+  background:
+    linear-gradient(#ff5a3a, #ff5a3a) left top / 10px 3px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) left top / 3px 10px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) right top / 10px 3px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) right top / 3px 10px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) left bottom / 10px 3px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) left bottom / 3px 10px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) right bottom / 10px 3px no-repeat,
+    linear-gradient(#ff5a3a, #ff5a3a) right bottom / 3px 10px no-repeat;
+  animation: lock-pulse 1.1s ease-in-out infinite;
+}
+
+.threat.lock svg {
+  display: none;
+}
+
+.threat.lock span {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 36px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #ffb8a8;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+@keyframes lock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Full-screen flash: the Citadel falling (gold) or your fortress (red). */
+.screen-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  animation: screen-flash 1.3s ease-out forwards;
+}
+
+.screen-flash.gold { background: radial-gradient(circle, rgba(255, 250, 220, 0.95) 0%, rgba(255, 210, 90, 0.6) 60%, rgba(255, 170, 40, 0.4) 100%); }
+.screen-flash.red { background: radial-gradient(circle, rgba(255, 220, 200, 0.8) 0%, rgba(220, 40, 20, 0.55) 70%); }
+.screen-flash.white { background: rgba(255, 255, 255, 0.9); }
+/* A stomp landing: a ring of dust bursting out to the screen's edges. */
+.screen-flash.impact {
+  background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(200, 160, 100, 0.35) 62%, rgba(90, 60, 30, 0.7) 100%);
+  animation: screen-impact 0.7s ease-out forwards;
+}
+
+@keyframes screen-impact {
+  0% { opacity: 0; transform: scale(0.75); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+@keyframes screen-flash {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Boss bars under the goal line (Minecraft-style): a giant's Heart, the raid, the Wither. */
+#hud-boss {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: 0;
+  pointer-events: none;
+}
+
+#hud-boss .bb {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 23px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: #ffb8a8;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  background: rgba(12, 8, 10, 0.72);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  --bar-hi: #ff6a5a;
+  --bar-lo: #b01a10;
+  --bar-edge: rgba(255, 120, 100, 0.5);
+}
+
+#hud-boss .bb b {
+  color: #ff6a50;
+  letter-spacing: 1px;
+}
+
+#hud-boss .bb em {
+  font-style: normal;
+  font-size: 11px;
+  color: #ff9a8a;
+}
+
+#hud-boss .bb.purple {
+  color: #e8c8ff;
+  --bar-hi: #d78cff;
+  --bar-lo: #6a1aa0;
+  --bar-edge: rgba(210, 150, 255, 0.55);
+}
+
+#hud-boss .bb.purple b {
+  color: #d9a4ff;
+}
+
+#hud-boss .bb.purple em {
+  color: #b8e4ff;
+}
+
+#hud-boss .bb.green {
+  color: #c8ffc0;
+  --bar-hi: #8cff6a;
+  --bar-lo: #2a9a18;
+  --bar-edge: rgba(140, 255, 110, 0.55);
+}
+
+#hud-boss .bb.green b,
+#hud-boss .bb.green em {
+  color: #a8ff8a;
+}
+
+#hud-boss .meter {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 0 1px var(--bar-edge);
+}
+
+#hud-boss .meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bar-hi) 0%, var(--bar-lo) 100%);
+  transition: width 0.25s ease-out;
+}
+
+/* Notches where something happens (the Wither's armour at half, the Colossus's furies). */
+#hud-boss .meter s {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+#hud-boss .bb.hit .meter i {
+  animation: boss-hit 0.3s ease-out;
+}
+
+@keyframes boss-hit {
+  0% { filter: brightness(3); }
+  100% { filter: brightness(1); }
+}
+
+/* Training: the control the current step needs wears a gold ring, and the coach's ring pulses
+   over it (see #coach-ring: scaled and faded by the compositor, no repaint every frame). */
+#ui .coach {
+  outline: 3px solid rgba(255, 210, 58, 0.95);
+  outline-offset: 3px;
+}
+
+#coach-ring {
+  left: 0;
+  top: 0;
+  z-index: 6;
+  pointer-events: none;
+  border-radius: 10px;
+}
+
+#coach-ring.round {
+  border-radius: 50%;
+}
+
+#coach-ring i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 3px rgba(255, 210, 58, 0.9);
+  animation: coach-ring 1s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes coach-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* Where the last blows came from: a red arc on that side of the screen. */
+.hurtdir {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 52px;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: 50% 26px;
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 46, 30, 0.92), rgba(255, 46, 30, 0.35) 45%, rgba(255, 46, 30, 0) 72%);
+}
+
+.hurtdir.show {
+  animation: hurtdir 1s ease-out forwards;
+}
+
+@keyframes hurtdir {
+  0% { opacity: 1; }
+  60% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+/* Damage numbers and streak words over struck creatures. */
+#floaters {
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#floaters .dmg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffffff;
+  white-space: nowrap;
+  text-shadow: 2px 2px 0 #1a1414, -1px -1px 0 #1a1414, 1px -1px 0 #1a1414, -1px 1px 0 #1a1414;
+  will-change: transform, opacity;
+}
+
+#floaters .dmg.crit {
+  font-size: 21px;
+  color: #ffd23a;
+}
+
+#floaters .dmg.streak {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #ffe070;
+}
+
+#floaters .dmg.big {
+  font-size: 24px;
+  color: #ff9a3a;
+}
+
+/* Picked-up items fly into the hotbar; the slot they land in bumps. */
+#ui img.fly {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.7));
+  transition: transform 0.34s cubic-bezier(0.45, -0.25, 0.75, 1), opacity 0.34s ease-in;
+}
+
+/* (Its icon bumps, inside the slot: the bar itself keeps its size.) */
+.slot.bump img {
+  animation: slot-bump 0.28s ease-out;
+}
+
+@keyframes slot-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.ctx-btn.stomp {
+  background: linear-gradient(180deg, #c87a3a 0%, #7a3e14 100%);
+}
+
+/* The FIRE (and STOMP) button greys round like a clock while it reloads. */
+.ctx-btn.stomp::after,
+.ctx-btn.fire::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background: conic-gradient(rgba(10, 6, 4, 0.55) calc(var(--cd, 0) * 360deg), rgba(0, 0, 0, 0) 0);
+}
+
+/* ---------------- quests & traders ---------------- */
+
+/* ---------------- the coach: mission cards, the hand, markers, cheers, captions ---------------- */
+
+/* One card under the day strip: a training step, a lesson, or (folded) the next goal. Glass over
+   the view, only as big as its words; a thumbnail of its picture beside them. A tap opens it: the
+   picture across the top, the why, the skip, on a darker glass. */
+#coach {
+  --ring: rgba(255, 210, 58, 0.72);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+  touch-action: none;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(180deg, rgba(22, 19, 12, 0.64) 0%, rgba(12, 10, 7, 0.58) 100%);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 1.5px var(--ring),
+    0 0 0 1px rgba(6, 5, 3, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.2);
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+}
+
+#coach.enter {
+  animation: coach-in 0.42s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+@keyframes coach-in {
+  0% { opacity: 0; transform: translateY(-14px) scale(0.94); }
+  100% { opacity: 1; transform: none; }
+}
+
+#coach.night { --ring: rgba(150, 170, 255, 0.75); }
+#coach.danger { --ring: rgba(255, 96, 70, 0.9); }
+#coach.quest { --ring: rgba(110, 230, 120, 0.75); }
+#coach.day { --ring: rgba(255, 255, 255, 0.32); }
+
+#coach.expanded {
+  background: linear-gradient(180deg, rgba(26, 22, 14, 0.9) 0%, rgba(14, 12, 9, 0.9) 100%);
+}
+
+#coach .c-art {
+  display: none;
+  position: relative;
+  height: var(--art-h, 110px);
+  flex: none;
+  overflow: hidden;
+}
+
+#coach.expanded:not(.no-art) .c-art {
+  display: block;
+}
+
+#coach.tight .c-art,
+#coach.tight .c-why {
+  display: none !important;
+}
+
+#coach .c-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 55%;
+  image-rendering: auto;
+  animation: art-drift 9s ease-out forwards;
+}
+
+@keyframes art-drift {
+  0% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+#coach .c-art::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46px;
+  background: linear-gradient(180deg, rgba(20, 17, 11, 0) 0%, rgba(20, 17, 11, 0.95) 100%);
+}
+
+#coach .c-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 10px 8px;
+}
+
+/* The picture, small, beside the words (folded cards of steps and lessons). */
+#coach .c-thumb {
+  display: none;
+  flex: none;
+  width: var(--thumb, 54px);
+  height: var(--thumb, 54px);
+  margin-top: 1px;
+  object-fit: cover;
+  object-position: center 55%;
+  image-rendering: auto;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--ring);
+}
+
+#coach:not(.goal):not(.expanded):not(.no-art) .c-thumb {
+  display: block;
+}
+
+#coach .c-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#coach .c-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+  overflow: hidden;
+}
+
+#coach .c-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+#coach .c-tag {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ffd23a;
+  white-space: nowrap;
+}
+
+#coach.night .c-tag { color: #b8c6ff; }
+#coach.danger .c-tag { color: #ff8a6a; }
+#coach.quest .c-tag { color: #9cff7a; }
+#coach.day .c-tag { color: #fff3c4; }
+
+#coach .c-pips {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  gap: 2px;
+  margin-left: 2px;
+}
+
+#coach .c-pips i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/* A narrow card: thinner pips, so all ten still fit beside the tag. */
+#coach.narrowed .c-pips i { width: 5px; }
+#coach.narrowed .c-tag { letter-spacing: 0.5px; }
+
+#coach .c-pips i.on { background: #7ee05a; }
+#coach .c-pips i.now { background: #ffd23a; animation: blink 1s steps(2) infinite; }
+
+#coach .c-dist {
+  margin-left: auto;
+  padding: 1px 6px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffe9a8;
+  background: rgba(255, 210, 58, 0.16);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+#coach .c-dist:empty { display: none; }
+
+#coach .c-more {
+  margin-left: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+}
+
+#coach .c-dist:empty + .c-more { margin-left: auto; }
+#coach.expanded .c-more { transform: rotate(180deg); }
+
+#coach .c-title {
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000, 0 0 4px rgba(0, 0, 0, 0.6);
+}
+
+#coach .c-why {
+  display: none;
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #e8d9b0;
+}
+
+#coach.expanded .c-why { display: block; }
+
+#coach .c-text {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin-top: 5px;
+  padding: 4px 8px 5px 7px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.28;
+  color: #ffffff;
+  background: rgba(255, 210, 58, 0.12);
+  border-radius: 4px;
+  box-shadow: inset 3px 0 0 #ffd23a;
+}
+
+#coach.night .c-text { background: rgba(150, 170, 255, 0.14); box-shadow: inset 3px 0 0 #a8b8ff; }
+#coach.danger .c-text { background: rgba(255, 96, 70, 0.16); box-shadow: inset 3px 0 0 #ff6a50; }
+#coach.quest .c-text { background: rgba(110, 230, 120, 0.13); box-shadow: inset 3px 0 0 #7ee05a; }
+
+#coach .c-go {
+  flex: none;
+  color: #ffd23a;
+  font-size: 11px;
+  line-height: 18px;
+  animation: go-nudge 0.9s ease-in-out infinite;
+}
+
+@keyframes go-nudge {
+  50% { transform: translateX(3px); }
+}
+
+#coach .c-text.flash {
+  animation: text-flash 0.7s ease-out;
+}
+
+@keyframes text-flash {
+  0% { background: rgba(255, 230, 120, 0.7); transform: scale(1.03); }
+  100% { transform: none; }
+}
+
+#coach .c-foot {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+#coach.step.expanded .c-foot { display: flex; }
+
+#coach .c-skip {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+#coach .c-skip.armed {
+  color: #fff;
+  background: #a0321e;
+}
+
+#coach .c-fold {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Read: a step or a lesson folds to its instruction (a new instruction brings the title back). */
+#coach.brief:not(.expanded) .c-title,
+#coach.brief:not(.expanded) .c-thumb {
+  display: none !important;
+}
+
+#coach.brief:not(.expanded) .c-text {
+  margin-top: 3px;
+}
+
+/* A phone's card: no thumbnail (a tap opens the picture), a size down, and once read one line: the
+   instruction beside its icon and the distance, the training's progress a thin bar along its foot. */
+#ui:not(.desktop) #coach .c-thumb {
+  display: none;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-main {
+  padding: 5px 8px 6px;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-head {
+  gap: 5px;
+  min-height: 16px;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-icon {
+  width: 16px;
+  height: 16px;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-tag {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+#ui:not(.desktop) #coach .c-pips i {
+  width: 5px;
+  height: 5px;
+}
+
+#ui:not(.desktop) #coach .c-dist {
+  padding: 0 5px;
+  font-size: 12px;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-title {
+  margin-top: 1px;
+  font-size: 14px;
+}
+
+#ui:not(.desktop) #coach:not(.goal) .c-text {
+  margin-top: 3px;
+  padding: 2px 6px 3px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+/* A long lesson keeps to four lines (three lying sideways); the card opens to the rest. */
+#ui:not(.desktop) #coach:not(.goal):not(.expanded) .c-text span {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#ui.short:not(.desktop) #coach:not(.goal):not(.expanded) .c-text span {
+  -webkit-line-clamp: 3;
+}
+
+#ui:not(.desktop) #coach.brief:not(.goal):not(.expanded) .c-text span {
+  -webkit-line-clamp: 2;
+}
+
+/* (Chinese characters stand taller than a Latin line, and Hindi's vowel signs reach above and below
+   it: at a Latin line's height the tops of the first hidden line would peep in under the last shown one.) */
+:lang(zh) #ui:not(.desktop) #coach .c-text,
+:lang(zh) #ui:not(.desktop) #coach.goal .c-title,
+:lang(zh) #ui:not(.desktop) #feat-pop span {
+  line-height: 1.42;
+}
+
+:lang(hi) #ui:not(.desktop) #coach .c-text,
+:lang(hi) #ui:not(.desktop) #coach.goal .c-title,
+:lang(hi) #ui:not(.desktop) #feat-pop span {
+  line-height: 1.55;
+}
+
+/* The goal line on a phone: the goal on one line or two, the bounty on one. */
+#ui:not(.desktop) #coach.goal .c-main {
+  padding: 4px 8px 5px;
+}
+
+#ui:not(.desktop) #coach.goal .c-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* (The tag, a village's name or the night's number, is on the day strip already: the goal gets the room.) */
+#ui:not(.desktop) #coach.goal .c-tag {
+  display: none;
+}
+
+#ui:not(.desktop) #coach.goal .c-title {
+  font-size: 13px;
+}
+
+#ui:not(.desktop) #coach.goal.has-text .c-text {
+  padding: 0 6px;
+}
+
+#ui:not(.desktop) #coach.goal.has-text .c-text span {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#ui:not(.desktop) #coach .c-go {
+  font-size: 10px;
+  line-height: 16px;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-main {
+  padding: 4px 8px 5px 6px;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-head {
+  display: contents;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-tag,
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-pips,
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-title {
+  display: none;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-more {
+  order: 4;
+  margin: 1px 0 0;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-icon {
+  order: 1;
+  margin-top: 1px;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-text {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-go {
+  display: none;
+}
+
+#ui:not(.desktop) #coach.brief:not(.expanded) .c-dist {
+  order: 3;
+  margin-left: 0;
+}
+
+/* The training's progress, along the card's foot. */
+#coach.step::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: calc(var(--prog, 0) * 100%);
+  background: #7ee05a;
+  border-radius: 0 2px 0 0;
+  pointer-events: none;
+}
+
+/* Lying sideways (and narrow cards): a size down, so the card keeps to its corner. */
+#coach.narrowed { --thumb: 46px; }
+#coach.narrowed .c-main { gap: 8px; padding: 6px 9px 7px; }
+#coach.narrowed .c-title { font-size: 15px; }
+#coach.narrowed .c-text { font-size: 13px; margin-top: 4px; }
+
+/* Folded goal line: one compact row (icon, tag, the goal, its distance), the bounty under it. */
+#coach.goal .c-main { padding: 5px 9px 6px; }
+#coach.goal .c-body { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; row-gap: 2px; }
+#coach.goal .c-head { display: contents; }
+#coach.goal .c-icon { order: 1; width: 18px; height: 18px; }
+#coach.goal .c-tag { order: 2; font-size: 12px; letter-spacing: 0.5px; }
+#coach.goal .c-pips { display: none; }
+#coach.goal .c-title { order: 3; flex: 1 1 0; min-width: 0; margin-top: 0; font-size: 14px; font-weight: 800; letter-spacing: 0; line-height: 1.22; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+#coach.goal .c-dist { order: 4; margin-left: 0; padding: 1px 6px; font-size: 12px; }
+#coach.goal .c-more { order: 5; margin-left: 0; }
+#coach.goal .c-text { display: none; }
+#coach.goal.has-text .c-text { order: 6; flex: 1 0 100%; display: flex; margin-top: 0; padding: 1px 7px; font-size: 12px; font-weight: 700; color: #ffe9a8; }
+#coach.goal.has-text .c-go { display: none; }
+
+#coach.goal {
+  background: linear-gradient(180deg, rgba(22, 19, 12, 0.5) 0%, rgba(12, 10, 7, 0.46) 100%);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--ring), 0 0 0 1px rgba(6, 5, 3, 0.4);
+}
+
+#coach.lesson .c-title { font-size: 16px; }
+#coach.lesson .c-text { font-size: 14px; }
+#coach.lesson.narrowed .c-title { font-size: 15px; }
+#coach.lesson.narrowed .c-text { font-size: 13px; }
+
+/* The lesson's NEW! tag. */
+#coach.lesson .c-tag {
+  padding: 0 5px;
+  color: #1a1408;
+  text-shadow: none;
+  background: #ffd23a;
+  border-radius: 3px;
+}
+
+#coach.lesson.danger .c-tag { background: #ff7a5a; }
+#coach.lesson.night .c-tag { background: #a8b8ff; }
+
+/* The pointing hand: its fingertip on the control, acting out the gesture. */
+#coach-hand {
+  left: 0;
+  top: 0;
+  width: 54px;
+  height: 68px;
+  z-index: 7;
+  pointer-events: none;
+}
+
+/* (Pointing at the crane's gauge, which stands over the other controls.) */
+#coach-hand.lifted,
+#coach-key.lifted {
+  z-index: 31;
+}
+
+#coach-hand .h-in {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#coach-hand svg {
+  width: 100%;
+  height: 100%;
+}
+
+#coach-hand .ripple {
+  position: absolute;
+  left: 22px;
+  top: 3px;
+  width: 0;
+  height: 0;
+}
+
+#coach-hand .tap .ripple::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 230, 120, 0.95);
+  animation: ripple 1.1s ease-out infinite;
+}
+
+@keyframes ripple {
+  0%, 30% { transform: scale(0.2); opacity: 0; }
+  40% { transform: scale(0.35); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+#coach-hand .tap svg {
+  animation: hand-tap 1.1s ease-in-out infinite;
+  transform-origin: 40% 10%;
+}
+
+@keyframes hand-tap {
+  0% { transform: translate(10px, 18px); }
+  30% { transform: translate(0, 0) scale(0.92); }
+  45% { transform: translate(0, 0) scale(0.92); }
+  100% { transform: translate(10px, 18px); }
+}
+
+#coach-hand .drag svg {
+  animation: hand-drag 1.6s ease-in-out infinite;
+}
+
+@keyframes hand-drag {
+  0% { transform: translate(0, 4px); opacity: 0.2; }
+  8% { opacity: 1; }
+  55% { transform: translate(0, -40px); opacity: 1; }
+  86% { transform: translate(0, -40px); opacity: 0.85; }
+  100% { transform: translate(0, 4px); opacity: 0.2; }
+}
+
+#coach-hand .swipe svg {
+  animation: hand-swipe 1.8s ease-in-out infinite;
+}
+
+@keyframes hand-swipe {
+  0% { transform: translate(46px, 0) rotate(-8deg); opacity: 0; }
+  15% { opacity: 1; }
+  65% { transform: translate(-64px, -6px) rotate(-14deg); opacity: 1; }
+  85%, 100% { transform: translate(-72px, -6px) rotate(-14deg); opacity: 0; }
+}
+
+#coach-hand .swipe .ripple::after {
+  content: '';
+  position: absolute;
+  left: -70px;
+  top: -3px;
+  width: 116px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(255, 230, 120, 0) 0%, rgba(255, 230, 120, 0.8) 100%);
+  animation: swipe-trail 1.8s ease-in-out infinite;
+}
+
+@keyframes swipe-trail {
+  0%, 15% { opacity: 0; transform: scaleX(0.1); transform-origin: right; }
+  65% { opacity: 0.9; transform: scaleX(1); transform-origin: right; }
+  100% { opacity: 0; }
+}
+
+/* Desktop: the key to press, bouncing over the control. */
+#coach-key {
+  left: 0;
+  top: 0;
+  z-index: 7;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+  animation: key-bob 0.9s ease-in-out infinite;
+}
+
+#coach-key kbd {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 9px;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 32px;
+  text-align: center;
+  color: #1a1408;
+  background: linear-gradient(180deg, #fff6d0 0%, #ffd23a 100%);
+  border-radius: 5px;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25), 0 0 0 2px #1a1408, 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes key-bob {
+  50% { margin-top: -5px; }
+}
+
+/* The marker over the spot (or at the screen's edge, pointing to it). */
+#coach-mark {
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+#coach-mark .m-label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #1a1408;
+  background: #ffd23a;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px #1a1408, 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+#coach-mark .m-dist {
+  font-size: 13px;
+  color: #5a3a08;
+}
+
+#coach-mark .m-name:empty { display: none; }
+#coach-mark.nolabel .m-label { display: none; }
+
+#coach-mark .m-arrow {
+  width: 22px;
+  height: 16px;
+  margin-top: 2px;
+  fill: #ffd23a;
+  stroke: #1a1408;
+  stroke-width: 2px;
+  animation: mark-bob 0.8s ease-in-out infinite;
+}
+
+@keyframes mark-bob {
+  50% { transform: translateY(5px); }
+}
+
+#coach-mark.danger .m-label,
+#coach-mark.danger .m-arrow { background: #ff6a50; fill: #ff6a50; }
+#coach-mark.danger .m-label { color: #fff; text-shadow: 1px 1px 0 #000; }
+#coach-mark.danger .m-dist { color: #ffe0d8; }
+
+#coach-mark.edge {
+  flex-direction: column-reverse;
+}
+
+#coach-mark.edge .m-arrow {
+  width: 34px;
+  height: 24px;
+  margin: 0 0 3px;
+  transform: rotate(var(--rot, 0rad));
+  animation: none;
+}
+
+/* A step done: a stamp and a pop of confetti. */
+#coach-stamp {
+  left: 0;
+  top: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+
+#coach-stamp .s-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: 2px 2px 0 #1a3a10;
+  background: linear-gradient(180deg, #6fd04a 0%, #2f8a1e 100%);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 0 0 3px #10260a, 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+#coach-stamp .s-in.final {
+  font-size: 19px;
+  background: linear-gradient(180deg, #ffd860 0%, #d08a10 100%);
+  text-shadow: 2px 2px 0 #4a2a00;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 3px #3a2000, 0 0 40px rgba(255, 200, 60, 0.6);
+}
+
+#coach-stamp .s-in b {
+  font-size: 24px;
+}
+
+#coach-stamp.go .s-in {
+  animation: stamp 1.3s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+
+#coach-stamp.go .s-in.final {
+  animation-duration: 2.6s;
+}
+
+@keyframes stamp {
+  0% { transform: scale(1.9) rotate(-10deg); opacity: 0; }
+  14% { transform: scale(1) rotate(-4deg); opacity: 1; }
+  78% { transform: scale(1) rotate(-4deg); opacity: 1; }
+  100% { transform: scale(0.9) rotate(-4deg) translateY(-14px); opacity: 0; }
+}
+
+#coach-stamp i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  opacity: 0;
+}
+
+#coach-stamp.go i {
+  animation: confetti 1.1s ease-out forwards;
+}
+
+@keyframes confetti {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 40px)) rotate(200deg) scale(0.6); opacity: 0; }
+}
+
+/* Names over the fortress's parts while you learn them. */
+#part-labels {
+  inset: 0;
+  pointer-events: none;
+}
+
+#part-labels .plabel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 2px 7px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #fff7d6;
+  white-space: nowrap;
+  background: rgba(10, 8, 6, 0.72);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 58, 0.45);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* The opening flyover: letterbox bars, big captions, the HUD out of the way. */
+#cine {
+  z-index: 30;
+  pointer-events: auto;
+  touch-action: none;
+  overflow: hidden;
+}
+
+#cine .bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11%;
+  background: #000;
+  animation: bars-in 0.8s ease-out;
+}
+
+#cine .bar.top { top: 0; }
+#cine .bar.bot { bottom: 0; }
+
+@keyframes bars-in {
+  0% { height: 0; }
+}
+
+#cine .cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(14% + var(--surface-viewport-safe-bottom, 0px));
+  padding: 0 18px;
+  text-align: center;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+}
+
+#cine .cap.in {
+  animation: cap-in 0.6s ease-out;
+}
+
+@keyframes cap-in {
+  0% { opacity: 0; transform: translateY(14px); letter-spacing: 6px; }
+  100% { opacity: 1; transform: none; }
+}
+
+#cine .cap .t {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  color: #ffd23a;
+  text-shadow: 3px 3px 0 #1a1408, 0 0 18px rgba(0, 0, 0, 0.8);
+}
+
+#cine .cap .s {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000, 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+#cine .skip {
+  position: absolute;
+  right: calc(14px + var(--surface-viewport-safe-right, 0px));
+  top: calc(11% + 10px);
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 4px;
+  animation: blink 1.6s steps(2) infinite;
+}
+
+#ui.cine > *:not(#cine):not(#prologue):not(#loading):not(.screen-flash) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#ui > * {
+  transition: opacity 0.5s ease;
+}
+
+/* In the thick of it (a thumb sweeping the view round, digging, striking): the boards, the card
+   and the news step back so the view is clear; they come back a moment after the thumb lifts. */
+#ui.acting:not(.craning) > #coach:not(.expanded),
+#ui.acting:not(.craning) > #hud-fort,
+#ui.acting:not(.craning) > #hud-day,
+#ui.acting:not(.craning) > #hud-helm,
+#ui.acting:not(.craning) > #hud-coop,
+#ui.acting:not(.craning) > #hint,
+#ui.acting:not(.craning) > #tip,
+#ui.acting:not(.craning) > #brief,
+#ui.acting:not(.craning) > #toasts,
+#ui.acting:not(.craning) > #feat-pop {
+  opacity: 0.28;
+  transition: opacity 0.22s ease;
+}
+
+#ui.short:not(.wide) #coach .c-art { display: none !important; }
+#ui.short:not(.wide) #coach .c-why { display: none !important; }
+#ui.short #coach .c-title { font-size: 15px; }
+#ui.short #coach .c-text { font-size: 13px; margin-top: 4px; padding: 3px 7px 4px; }
+#ui.short #coach.goal .c-title { font-size: 13px; }
+#ui.short #coach.goal.has-text .c-text { font-size: 12px; margin-top: 0; padding: 1px 7px; }
+#ui.short #cine .cap .t { font-size: 24px; }
+#ui.short #cine .cap .s { font-size: 15px; }
+
+/* Today's plan, dropped down from the goal line. */
+#hud-plan {
+  padding: 10px 12px 10px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.3;
+  border-radius: 6px;
+  color: #f2f2f2;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: auto;
+  background: rgba(12, 12, 18, 0.84);
+}
+
+#hud-plan .ptitle {
+  color: #ffd23a;
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+#hud-plan ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#hud-plan li {
+  display: flex;
+  gap: 6px;
+}
+
+#hud-plan li i {
+  flex: none;
+  width: 16px;
+  font-style: normal;
+  color: #ffd23a;
+}
+
+#hud-plan li.done {
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: line-through;
+}
+
+#hud-plan li.done i {
+  color: #7ee05a;
+  text-decoration: none;
+}
+
+#hud-plan .pbtns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stone.mini {
+  flex: 1;
+  min-height: 40px;
+  padding: 0 8px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+/* A tip, the first time something new turns up. */
+#tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 10px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.32;
+  color: #fff7d6;
+  text-shadow: 1px 1px 0 #000;
+  background: rgba(24, 20, 10, 0.64);
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 58, 0.45), 0 0 0 1px rgba(8, 8, 10, 0.55);
+  border-radius: 6px;
+  pointer-events: auto;
+  animation: tip-in 0.35s ease-out;
+}
+
+#tip b {
+  flex: none;
+  padding: 2px 6px;
+  font-size: 12px;
+  color: #2a2008;
+  text-shadow: none;
+  background: #ffd23a;
+  border-radius: 2px;
+  margin-top: 1px;
+}
+
+@keyframes tip-in {
+  0% { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* The dawn / dusk / welcome card. */
+#brief {
+  padding: 9px 12px 8px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  color: #f4f4f4;
+  text-shadow: 1px 1px 0 #000;
+  background: rgba(12, 12, 18, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(8, 8, 10, 0.55);
+  border-radius: 8px;
+  pointer-events: auto;
+  animation: brief-in 0.5s ease-out;
+}
+
+#brief .btitle {
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: #ffd23a;
+  text-shadow: 2px 2px 0 #1a1a1a;
+}
+
+#brief.night .btitle { color: #a8b8ff; }
+#brief.danger .btitle { color: #ff6a50; }
+#brief.day .btitle { color: #ffe066; }
+
+#brief .bsub {
+  margin-top: 3px;
+  font-size: 14px;
+  color: #e8e8e8;
+}
+
+#brief ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.28;
+}
+
+/* The card keeps to its first four points (the full plan is a tap away on the goal line). */
+#brief li:nth-child(n + 5) { display: none; }
+
+#brief li {
+  padding-left: 10px;
+  text-indent: -10px;
+}
+
+#brief .bfoot {
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@keyframes brief-in {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: none; }
+}
+
+#ui.short #brief { padding: 6px 10px 6px; }
+#ui.short #brief .btitle { font-size: 16px; letter-spacing: 1px; }
+#ui.short #brief ul { margin-top: 4px; gap: 3px; font-size: 13px; }
+#ui.short #brief li:nth-child(n + 4),
+#ui.short #brief .bfoot { display: none; }
+
+/* The handbook. */
+#guide-modal .gsec {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  overflow: hidden;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+  color: #fff;
+  text-shadow: 1px 1px 0 #333;
+}
+
+#guide-modal .gart {
+  display: block;
+  width: calc(100% + 24px);
+  height: 104px;
+  margin: -10px -12px 8px;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+#guide-modal .ghead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  letter-spacing: 1px;
+  color: #ffe070;
+}
+
+#guide-modal .ghead img {
+  width: 26px;
+  height: 26px;
+}
+
+#guide-modal ul {
+  margin: 7px 0 0;
+  padding: 0 0 0 18px;
+  font-size: 14.5px;
+  line-height: 1.42;
+  font-weight: 700;
+}
+
+#guide-modal li + li {
+  margin-top: 3px;
+}
+
+.big-btn.gold {
+  background: linear-gradient(180deg, #e7b72e 0%, #a87610 100%);
+}
+
+/* The boiler gauge at the helm, the emeralds in the status board, daylight left on the clock. */
+#hud-helm .steam {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+}
+
+#hud-helm .steam em {
+  font-style: normal;
+  color: #cfe8ff;
+}
+
+#hud-helm .steam .meter {
+  flex: none;
+  width: 34px;
+  height: 6px;
+  min-width: 0;
+}
+
+#hud-helm .steam .meter > i {
+  background: linear-gradient(180deg, #e8f4ff 0%, #8cb8e0 100%);
+}
+
+#hud-helm .steam.on em { color: #ffb050; }
+#hud-helm .steam.on .meter > i { background: linear-gradient(180deg, #ffd080 0%, #e07020 100%); }
+#hud-helm .steam.low em { color: #ff7a6a; }
+
+#hud-fort .gems {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  color: #9cff7a;
+}
+
+#hud-fort .gems img {
+  width: 11px;
+  height: 11px;
+}
+
+#hud-day em {
+  font-style: normal;
+  color: rgba(255, 243, 216, 0.75);
+}
+
+#hud-day em.late {
+  color: #ff9a6a;
+  animation: blink 1s steps(2) infinite;
+}
+
+.ctl.jump.steam {
+  flex-direction: column;
+  gap: 0;
+  background: linear-gradient(180deg, #8a9cb0 0%, #56687c 100%);
+}
+
+.ctl.jump.steam svg {
+  width: 46%;
+  height: 46%;
+}
+
+.ctl.jump.steam span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.ctl.jump.steam.burning {
+  background: linear-gradient(180deg, #f0a040 0%, #b05a10 100%);
+}
+
+.ctl.jump.steam.empty {
+  filter: grayscale(0.85) brightness(0.8);
+}
+
+#village-modal .quest-box {
+  margin: 4px 8px 8px;
+  padding: 8px 10px;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+  color: #fff;
+  font-size: 15px;
+  text-shadow: 1px 1px 0 #333;
+}
+
+#village-modal .quest-box small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #f0f0f0;
+}
+
+#village-modal .quest-box .ok { color: #9cff7a; }
+#village-modal .quest-box .gold { color: #ffe070; }
+
+#village-modal .trust {
+  margin: 0 8px 10px;
+  font-size: 14px;
+  color: #3a3a3a;
+}
+
+#village-modal .trust.ok { color: #2a6a1a; }
+
+#village-modal .big-btn {
+  margin: 0 8px 10px;
+}
+
+#village-modal .gem {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  image-rendering: pixelated;
+}
+
+.trade {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin: 0 8px 6px;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+  color: #fff;
+  text-shadow: 1px 1px 0 #333;
+}
+
+.trade > img {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+  flex: none;
+}
+
+.trade .info {
+  flex: 1;
+  font-size: 15px;
+}
+
+.trade .trade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+  min-height: 40px;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  background: linear-gradient(180deg, #3fb85a 0%, #1f7a34 100%);
+}
+
+.trade .trade-btn img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.trade .trade-btn.off {
+  filter: grayscale(0.8) brightness(0.85);
+}
+
+.threat.quest polygon { fill: #ffd23a; }
+.threat.star polygon { fill: #fff3a8; }
+.threat.star { width: 28px; height: 28px; filter: drop-shadow(0 0 5px rgba(255, 220, 90, 0.95)); }
+
+.trade .info small {
+  display: block;
+  font-size: 13px;
+  color: #f0f0f0;
+}
+
+/* ---------------- voices & feats ---------------- */
+
+/* Speech bubbles over villagers and crew: white, chunky, a tail pointing at the speaker. */
+#bubbles {
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#bubbles .bubble {
+  --tail: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 190px;
+  padding: 5px 9px 6px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.22;
+  font-weight: 800;
+  text-align: center;
+  color: #26201a;
+  background: #fbf8ef;
+  border-radius: 9px;
+  box-shadow: 0 0 0 2px #2a2218, 0 3px 0 2px rgba(0, 0, 0, 0.28);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  margin-top: -10px;
+}
+
+#bubbles .bubble::after {
+  content: "";
+  position: absolute;
+  left: calc(50% + var(--tail) - 7px);
+  bottom: -8px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid #fbf8ef;
+  filter: drop-shadow(0 2px 0 #2a2218);
+}
+
+#bubbles .bubble.shout {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: #3a0c06;
+  background: #ffe9a8;
+  box-shadow: 0 0 0 2px #5a1a0c, 0 3px 0 2px rgba(0, 0, 0, 0.3);
+}
+
+#bubbles .bubble.shout::after {
+  border-top-color: #ffe9a8;
+  filter: drop-shadow(0 2px 0 #5a1a0c);
+}
+
+#bubbles .bubble.cheer {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #3a2a04;
+  background: #ffd23a;
+  box-shadow: 0 0 0 2px #4a3404, 0 3px 0 2px rgba(0, 0, 0, 0.3);
+}
+
+#bubbles .bubble.cheer::after {
+  border-top-color: #ffd23a;
+  filter: drop-shadow(0 2px 0 #4a3404);
+}
+
+/* A feat earned: a gold card with its badge (tap it away). */
+#feat-pop {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 6px 6px;
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+  color: #fff7d6;
+  text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(180deg, rgba(58, 42, 6, 0.8) 0%, rgba(30, 22, 4, 0.8) 100%);
+  box-shadow: inset 0 0 0 2px #ffd23a, 0 0 0 1px rgba(8, 8, 10, 0.6), 0 0 14px rgba(255, 210, 58, 0.3);
+  border-radius: 8px;
+  pointer-events: auto;
+}
+
+#feat-pop.on {
+  display: flex;
+  animation: feat-in 3.8s ease forwards;
+}
+
+#feat-pop img {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  padding: 3px;
+  background: rgba(255, 210, 58, 0.18);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 58, 0.6);
+  animation: feat-badge 0.9s ease-out;
+}
+
+#feat-pop small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #ffd23a;
+}
+
+#feat-pop b {
+  display: block;
+  font-size: 15px;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+#feat-pop span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #f2e6c0;
+}
+
+@keyframes feat-in {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.92); }
+  7% { opacity: 1; transform: translateY(0) scale(1.03); }
+  12% { transform: scale(1); }
+  88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes feat-badge {
+  0% { transform: rotate(-25deg) scale(0.3); }
+  60% { transform: rotate(10deg) scale(1.25); }
+  100% { transform: none; }
+}
+
+/* The list of feats in the pause menu: inventory slots, the earned ones in gold. */
+#feats-modal .help {
+  margin-bottom: 8px;
+  color: #3a3a3a;
+}
+
+.ft-row {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 7px 9px;
+  margin-bottom: 6px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #333;
+  background: #8b8b8b;
+  box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #ffffff;
+}
+
+.ft-row.done {
+  background: linear-gradient(180deg, #b38a26 0%, #8a6512 100%);
+  box-shadow: inset 2px 2px 0 #4a3404, inset -2px -2px 0 #ffe9a0;
+}
+
+.ft-row img {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.ft-row:not(.done) img {
+  filter: grayscale(0.7) brightness(0.9);
+}
+
+.ft-row div {
+  flex: 1;
+  min-width: 0;
+}
+
+.ft-row b {
+  display: block;
+  font-size: 15px;
+  color: #f2f2f2;
+}
+
+.ft-row.done b {
+  color: #fff3b0;
+}
+
+.ft-row small {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #e8e8e8;
+}
+
+.ft-row i {
+  flex: none;
+  font-style: normal;
+  font-size: 22px;
+  color: #ffe060;
+  text-shadow: 0 0 8px rgba(255, 230, 120, 0.9), 1px 1px 0 #3a2a04;
+}
+
+.ft-row em {
+  flex: none;
+  font-style: normal;
+  font-size: 13px;
+  color: #f0f0f0;
+}
+
+/* ---------------- status effects & the totem ---------------- */
+
+/* The effects on you, a row of little squares over the hearts (harmful ones in red). */
+#effects {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+}
+
+#effects .fx {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 5px 0 3px;
+  font-family: "Lucida Console", "Courier New", Menlo, monospace;
+  font-size: 11px;
+  color: #f2f2f2;
+  text-shadow: 1px 1px 0 #000;
+  background: rgba(14, 16, 24, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(150, 200, 255, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.6);
+  border-radius: 3px;
+}
+
+#effects .fx.bad {
+  box-shadow: inset 0 0 0 1px rgba(255, 110, 90, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+#effects .fx img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+#effects .fx b {
+  position: absolute;
+  left: 13px;
+  top: -3px;
+  font-size: 9px;
+  color: #ffd23a;
+}
+
+#effects .fx.ending {
+  animation: blink 0.5s steps(2) infinite;
+}
+
+/* Poisoned hearts go green; withered ones go black. */
+#vitals .hearts.poisoned img { filter: hue-rotate(105deg) saturate(1.3) brightness(1.05); }
+#vitals .hearts.withered img { filter: grayscale(1) brightness(0.32) contrast(1.4); }
+
+/* A totem of undying: it flies up before your eyes, spinning, in a gold glow. */
+.totem-pop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  perspective: 600px;
+}
+
+.totem-pop img {
+  width: 34vmin;
+  height: 34vmin;
+  width: 34cqmin;
+  height: 34cqmin;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 16px rgba(255, 220, 90, 0.85)) drop-shadow(0 0 28px rgba(120, 255, 120, 0.5));
+  animation: totem-rise 1.6s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+@keyframes totem-rise {
+  0% { transform: translateY(42cqh) scale(0.2) rotateY(0deg); opacity: 0; }
+  12% { opacity: 1; }
+  45% { transform: translateY(0) scale(1.15) rotateY(540deg); }
+  75% { transform: translateY(-2cqh) scale(1) rotateY(720deg); opacity: 1; }
+  100% { transform: translateY(-6cqh) scale(0.9) rotateY(760deg); opacity: 0; }
+}
+
+/* ---------------- the stomp ---------------- */
+
+/* Held, the STOMP button fills from the bottom as the hull heaves up (shaking at full power). */
+.ctx-btn.stomp .charge {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  height: calc((100% - 6px) * var(--charge, 0));
+  background: linear-gradient(0deg, rgba(255, 130, 30, 0.9) 0%, rgba(255, 220, 90, 0.65) 100%);
+  pointer-events: none;
+}
+
+.ctx-btn.stomp img,
+.ctx-btn.stomp span {
+  position: relative;
+}
+
+/* Monsters on the legs (or the deck): how many, in a red badge, and the button pulses. */
+.ctx-btn.stomp .badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  font-size: 11px;
+  line-height: 16px;
+  color: #fff;
+  text-align: center;
+  background: #d8261c;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8);
+}
+
+.ctx-btn.stomp .badge:empty {
+  display: none;
+}
+
+.ctx-btn.stomp.alert {
+  animation: stomp-alert 0.9s ease-in-out infinite;
+  /* (It swells inwards, off the edge of the view.) */
+  transform-origin: 100% 50%;
+}
+
+/* (A pulse of size, not of a glow: the compositor moves it, nothing is repainted each frame.) */
+@keyframes stomp-alert {
+  50% { transform: scale(1.1); }
+}
+
+#ui:not(.desktop) .ctx-btn.stomp.alert {
+  opacity: 1;
+}
+
+.ctx-btn.stomp.charging {
+  animation: stomp-shake 0.12s linear infinite;
+}
+
+.ctx-btn.stomp.full {
+  animation: stomp-shake 0.06s linear infinite;
+  box-shadow: 0 0 0 3px #ffd23a, 0 0 18px rgba(255, 210, 58, 0.9);
+}
+
+@keyframes stomp-shake {
+  25% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+}
+
+/* ---------------- cloud saves ---------------- */
+
+.big-btn.sky {
+  background: linear-gradient(180deg, #5aa0d8 0%, #2e6aa8 100%);
+}
+
+.big-btn.sky.ok {
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.35),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.38),
+    0 0 0 2px #1b1b1b,
+    0 0 0 4px rgba(140, 230, 120, 0.85);
+}
+
+#cloud-modal {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#cloud-modal .scroll {
+  flex: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 14px;
+}
+
+#cloud-modal .big-btn {
+  width: 100%;
+  max-width: none;
+  color: #fff;
+}
+
+.cloud-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #b4b4b4;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.18), inset -2px -2px 0 rgba(255, 255, 255, 0.5);
+}
+
+.cloud-status img {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  filter: grayscale(1) brightness(0.9);
+}
+
+.cloud-status b {
+  display: block;
+  font-size: 16px;
+  color: #3a3a3a;
+}
+
+.cloud-status small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: #555;
+}
+
+.cloud-status.ok {
+  background: #a8d89a;
+}
+
+.cloud-status.ok img,
+.cloud-status.busy img {
+  filter: none;
+}
+
+.cloud-status.busy img {
+  animation: cloud-bob 0.9s ease-in-out infinite;
+}
+
+.cloud-status.warn {
+  background: #e8c88a;
+}
+
+@keyframes cloud-bob {
+  50% { transform: translateY(-3px); }
+}
+
+.cloud-code {
+  pointer-events: auto;
+  padding: 10px 6px;
+  text-align: center;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #1e2a3a;
+  background: #eef2f6;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.25), 0 0 0 2px #2e6aa8;
+  -webkit-user-select: all;
+  user-select: all;
+}
+
+.cloud-find {
+  display: flex;
+  gap: 8px;
+}
+
+.cloud-find input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 8px;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  user-select: text;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 17px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #1e2a3a;
+  background: #f4f4f4;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #1b1b1b;
+  outline: none;
+}
+
+#cloud-modal .cloud-find .big-btn {
+  width: 84px;
+  flex: none;
+}
+
+.cloud-note {
+  font-size: 14px;
+  color: #6a2a1a;
+}
+
+.cloud-found {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #d8e8f4;
+  box-shadow: 0 0 0 2px #2e6aa8;
+}
+
+.cloud-found b {
+  font-size: 18px;
+  color: #1e2a3a;
+}
+
+.cloud-found span {
+  font-size: 13px;
+  color: #3a4a5a;
+}
+
+/* ---------------- playing together (co-op) ---------------- */
+
+.big-btn.red {
+  background: linear-gradient(180deg, #d0584a 0%, #96281e 100%);
+}
+
+.big-btn[disabled] {
+  opacity: 0.55;
+  filter: grayscale(0.4);
+}
+
+#coop-modal {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#coop-modal .scroll {
+  flex: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 14px;
+}
+
+#coop-modal .big-btn {
+  width: 100%;
+  max-width: none;
+  color: #fff;
+}
+
+#coop-modal .cloud-find .big-btn {
+  width: 84px;
+  flex: none;
+}
+
+#coop-modal .help b {
+  color: #2a2a2a;
+}
+
+#coop-modal .coop-intro {
+  font-size: 15px;
+}
+
+/* The room code: big and spaced, easy to read out across a room. */
+.coop-code {
+  font-size: 36px;
+  letter-spacing: 10px;
+  padding: 8px 6px 8px 16px;
+  font-weight: 800;
+}
+
+#hud-coop {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px;
+  border: 0;
+  font-size: 12px;
+  color: #fff3d8;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#hud-coop img {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+#hud-coop b {
+  color: #8fe07a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#hud-coop .ping {
+  margin-left: auto;
+  color: #c8c0a8;
+}
+
+#hud-coop .mhp {
+  flex: none;
+  width: 34px;
+  height: 6px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7);
+}
+
+#hud-coop .mhp i {
+  display: block;
+  height: 100%;
+  background: #e8413a;
+}
+
+#hud-coop .mhp.low i {
+  background: #ff8a3a;
+  animation: mhp-blink 0.8s steps(2) infinite;
+}
+
+@keyframes mhp-blink {
+  50% { opacity: 0.35; }
+}
+
+/* Co-op: the mate's name over its head. */
+#mate-tag {
+  left: 0;
+  top: 0;
+  padding: 2px 7px 3px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #8fe07a;
+  white-space: nowrap;
+  background: rgba(10, 8, 6, 0.66);
+  border-radius: 3px;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+#mate-tag.down {
+  color: #ffb070;
+}
+
+#hud-coop.warn b {
+  color: #ffb070;
+}
+
+/* ---------------- language ---------------- */
+
+/* Chinese: a CJK face of the same weight (the Latin faces have no Chinese). */
+html:lang(zh-CN) #ui {
+  font-family: "Trebuchet MS", Verdana, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", system-ui, sans-serif;
+}
+
+/* Hindi: the same faces for the Latin letters and figures, a Devanagari face for the rest (after the
+   system's own, so the figures keep their usual height). */
+html:lang(hi) #ui {
+  font-family: "Trebuchet MS", Verdana, "Segoe UI", system-ui, "Nirmala UI", "Kohinoor Devanagari", "Noto Sans Devanagari", "Devanagari Sangam MN", Mangal, sans-serif;
+}
+
+/* (Devanagari letters hang from one headline: letter spacing would break it into pieces.) */
+#ui :lang(hi) {
+  letter-spacing: 0 !important;
+}
+
+/* (Hindi's vowel signs reach above and below a Latin line: the one-line boxes that cut off what
+   overflows them leave the letters room.) */
+html:lang(hi) .setting small,
+html:lang(hi) .setting b {
+  line-height: 1.5;
+}
+
+html:lang(hi) #hud-day .course,
+html:lang(hi) #hud-helm .course,
+html:lang(hi) #hud-coop b,
+html:lang(hi) .toast.held small,
+html:lang(hi) #map-modal .ms-note {
+  padding-block: 3px;
+}
+
+#lang-modal {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#lang-modal h2 span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#lang-modal h2 .globe {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+#lang-modal .big-btn {
+  letter-spacing: 0.5px;
+}
+
+/* (A short screen lying wide, a phone held sideways: the languages in two columns, all of them in view.) */
+#ui.short.wide #lang-modal .menu-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+#lang-modal .cloud-note {
+  margin: 0 14px 14px;
+}
+
+
+/* ---------------- the title ---------------- */
+
+/* The painted valley with the fortress striding through it (portrait or landscape art), the logo,
+   and riveted Minecraft-style buttons: portrait, logo over the fortress and buttons at the foot;
+   wide screens, both down the left with the fortress on the right, as the key art is painted. */
+
+#title {
+  overflow: hidden;
+  background: linear-gradient(180deg, #5d9be0 0%, #8cc4f2 55%, #6f9a4a 100%);
+}
+
+#title .art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  image-rendering: auto;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  /* (Anchored at the top: the slow drift never cuts the fortress's tower.) */
+  transform-origin: 62% 0%;
+  animation: title-drift 30s ease-in-out infinite alternate;
+}
+
+#title .art.in {
+  opacity: 1;
+}
+
+#title.wide .art {
+  object-position: 70% 10%;
+}
+
+@keyframes title-drift {
+  from { transform: scale(1); }
+  to { transform: scale(1.05) translateX(-0.8%); }
+}
+
+#title .shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 22, 44, 0.22) 0%, rgba(10, 22, 44, 0) 26%, rgba(10, 22, 44, 0) 60%, rgba(6, 14, 8, 0.45) 100%);
+}
+
+#title.wide .shade {
+  background: linear-gradient(90deg, rgba(8, 18, 34, 0.32) 0%, rgba(8, 18, 34, 0.12) 36%, rgba(8, 18, 34, 0) 52%);
+}
+
+#title-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#title.wide #title-panel {
+  justify-content: center;
+  gap: clamp(12px, 5vh, 44px);
+  gap: clamp(12px, 5cqh, 44px);
+}
+
+#title-panel .t-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#title.wide #title-panel .t-top {
+  align-items: flex-start;
+}
+
+#title-panel .t-logo {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  image-rendering: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  animation: logo-in 0.8s cubic-bezier(0.2, 1.3, 0.35, 1) both;
+}
+
+#title-panel .logo {
+  display: block;
+}
+
+@keyframes logo-in {
+  from { opacity: 0; transform: translateY(-26px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+#title-panel .bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+#title.wide #title-panel .bottom {
+  align-items: flex-start;
+}
+
+/* Riveted buttons: a speckled face, a dark frame in an iron rim, gold rivets at the corners. */
+.mc-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.42), 2px 2px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  image-rendering: pixelated;
+  background-color: #4aa52c;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #8de25f 0%, #5fbf38 42%, #48a428 58%, #2f8019 100%);
+  background-size: 48px 48px, 100% 100%;
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 3px #141a0f,
+    0 0 0 6px #5e676d,
+    0 0 0 8px #1b1f22,
+    0 9px 16px rgba(0, 0, 0, 0.42);
+  transition: transform 0.08s ease, filter 0.08s ease;
+}
+
+.mc-btn::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left top / 9px 9px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right top / 9px 9px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left bottom / 9px 9px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right bottom / 9px 9px no-repeat;
+}
+
+.mc-btn:active {
+  transform: translateY(2px);
+  filter: brightness(0.92);
+}
+
+.mc-btn.mc-blue {
+  background-color: #2f6fd0;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #74bdff 0%, #4590e8 42%, #3074d2 58%, #1d4fa3 100%);
+}
+
+.mc-btn.mc-blue.ok {
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 3px #141a0f,
+    0 0 0 6px #6fd65a,
+    0 0 0 8px #1b1f22,
+    0 9px 16px rgba(0, 0, 0, 0.42);
+}
+
+.mc-btn img {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+#title-panel .t-main {
+  width: min(100% - 16px, var(--t-w, 340px));
+  height: var(--t-main-h, 64px);
+  font-size: calc(var(--t-main-h, 64px) * 0.44);
+  letter-spacing: 3px;
+  white-space: nowrap;
+  padding: 0 14px;
+}
+
+/* A light sweeps across the big button now and then. */
+#title-panel .t-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.26) 47%, transparent 56%) 0 0 / 260% 100% no-repeat;
+  animation: btn-shine 4.2s ease-in-out infinite;
+}
+
+@keyframes btn-shine {
+  0% { background-position: 120% 0; }
+  55%, 100% { background-position: -20% 0; }
+}
+
+/* With a game saved, NEW GAME steps down to a plain stone button under CONTINUE. */
+#title.has-save #title-panel .t-main[data-combos-action="start"] {
+  width: min(100% - 16px, var(--t-w, 340px) * 0.76);
+  height: max(44px, var(--t-main-h, 64px) * 0.72);
+  font-size: calc(var(--t-main-h, 64px) * 0.3);
+  background-color: #7d7d7d;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #b4b4b4 0%, #929292 45%, #777 60%, #5d5d5d 100%);
+}
+
+#title.has-save #title-panel .t-main[data-combos-action="start"]::after {
+  display: none;
+}
+
+#title-panel .title-row {
+  display: flex;
+  gap: 20px;
+  width: min(100% - 16px, var(--t-w, 340px));
+}
+
+#title.wide #title-panel .t-main,
+#title.wide #title-panel .title-row {
+  width: calc(100% - 16px);
+  margin-left: 8px;
+}
+
+#title.wide.has-save #title-panel .t-main[data-combos-action="start"] {
+  width: calc(70% - 16px);
+}
+
+#title-panel .title-row .mc-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--t-row-h, 54px);
+  padding: 0 8px;
+  font-size: calc(var(--t-row-h, 54px) * 0.29);
+  line-height: 1.1;
+  text-align: center;
+}
+
+#title-panel .title-row .mc-btn img {
+  width: calc(var(--t-row-h, 54px) * 0.48);
+  height: calc(var(--t-row-h, 54px) * 0.48);
+}
+
+/* Chinese breaks anywhere: the two small buttons keep their words on one line. */
+html:lang(zh-CN) #title-panel .title-row .mc-btn span {
+  white-space: nowrap;
+}
+
+#title-panel .note {
+  max-width: calc(100% - 8px);
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: rgba(8, 14, 26, 0.58);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #f2f2f2;
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
+}
+
+#title.wide #title-panel .note {
+  margin-left: 8px;
+  text-align: left;
+}
+
+#title-panel .note .keys {
+  color: #fff3c4;
+}
+
+#title-panel .note .news {
+  color: #8dffb4;
+  font-weight: 800;
+}
+
+/* The language switch: the globe and every language by its short name, in an iron frame with gold
+   rivets (all inside its own box: nothing reaches outside it). */
+.lang-pill {
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  border: 2px solid #15181a;
+  border-radius: 2px;
+  background:
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left top / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right top / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left bottom / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right bottom / 6px 6px no-repeat,
+    linear-gradient(#15181a, #15181a) content-box,
+    #4d555b;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.45);
+}
+
+.lang-pill button {
+  height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #3a4146 0%, #262b2f 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.lang-pill .lp-globe {
+  min-width: 38px;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd84a;
+}
+
+.lang-pill .lp-globe .globe {
+  width: 22px;
+  height: 22px;
+}
+
+/* (The narrowest views, or wherever the switch would not fit its place: the segments close up, still
+   a thumb's width tall.) */
+@container (max-width: 340px) {
+  .lang-pill {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .lang-pill button {
+    min-width: 40px;
+    padding: 0 5px;
+    font-size: 15px;
+  }
+
+  .lang-pill .lp-globe {
+    min-width: 32px;
+    padding: 0 5px;
+  }
+}
+
+.lang-pill.tight {
+  gap: 2px;
+  padding: 3px;
+}
+
+.lang-pill.tight button {
+  min-width: 38px;
+  padding: 0 5px;
+  font-size: 15px;
+}
+
+.lang-pill.tight .lp-globe {
+  min-width: 32px;
+  padding: 0 5px;
+}
+
+.lang-pill .lp-seg.on {
+  background: linear-gradient(180deg, #86dc5b 0%, #52ad31 55%, #37861d 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.36), inset 0 -3px 0 rgba(0, 0, 0, 0.28);
+}
+
+.lang-pill button:active {
+  filter: brightness(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #title .art,
+  #title-panel .t-logo,
+  #title-panel .t-main::after {
+    animation: none;
+  }
+}
+
+
+/* ---------------- touch controls (phones): the painted set, thumbs in the corners ---------------- */
+
+.stick-zone {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* The painted set, lightened: at rest the controls are glass over the view (the world shows
+   through), under the thumb they light up whole. No filters: shadows are painted into the art. */
+#ui:not(.desktop) .stick {
+  border-radius: 50%;
+  background: var(--ui-stick) center / 100% 100% no-repeat;
+  box-shadow: none;
+  opacity: 0.48;
+  transition: opacity 0.14s linear;
+}
+
+#ui:not(.desktop) .stick.pressed {
+  opacity: 0.92;
+}
+
+#ui:not(.desktop) .stick .knob {
+  width: 52%;
+  height: 52%;
+  border-radius: 50%;
+  background: var(--ui-knob) center / 100% 100% no-repeat;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+}
+
+/* At the helm the stick walks and turns the fortress. */
+#ui:not(.desktop) .stick.drive {
+  border-radius: 50%;
+  background: var(--ui-stick) center / 100% 100% no-repeat;
+  box-shadow: 0 0 0 3px rgba(255, 210, 90, 0.75), 0 0 16px rgba(255, 190, 70, 0.5);
+  opacity: 0.8;
+}
+
+.ctl.attack {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#ui:not(.desktop) .ctl.jump,
+#ui:not(.desktop) .ctl.attack,
+#ui:not(.desktop) .ctx-btn {
+  border-radius: 50%;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  transition: transform 0.06s linear, opacity 0.12s linear;
+}
+
+#ui:not(.desktop) .ctl.jump,
+#ui:not(.desktop) .ctl.attack {
+  opacity: 0.72;
+}
+
+#ui:not(.desktop) .ctx-btn {
+  opacity: 0.86;
+}
+
+#ui:not(.desktop) .ctl.jump { background-image: var(--ui-jump); }
+#ui:not(.desktop) .ctl.jump svg { display: none; }
+#ui:not(.desktop) .ctl.attack { background-image: var(--ui-attack); }
+
+/* What is in hand, on gold: the button throws, fires or eats it. */
+.ctl.attack img.held { display: none; }
+#ui:not(.desktop) .ctl.attack.use { background-image: var(--ui-gold); }
+#ui:not(.desktop) .ctl.attack.use img.held {
+  display: block;
+  width: 46%;
+  height: 46%;
+}
+
+#ui:not(.desktop) .ctl.jump.pressed,
+#ui:not(.desktop) .ctl.attack.pressed,
+#ui:not(.desktop) .ctx-btn:active {
+  opacity: 1;
+  transform: scale(0.92);
+}
+
+/* At the helm the jump button is the steam valve. */
+#ui:not(.desktop) .ctl.jump.steam {
+  background-image: var(--ui-stone);
+  opacity: 0.86;
+}
+
+#ui:not(.desktop) .ctl.jump.steam svg {
+  display: block;
+}
+
+#ui:not(.desktop) .ctx-btn {
+  overflow: visible;
+  padding: 0;
+}
+
+#ui:not(.desktop) .ctx-btn.fire { background-image: var(--ui-red); }
+#ui:not(.desktop) .ctx-btn.leap { background-image: var(--ui-gold); }
+#ui:not(.desktop) .ctx-btn.horn { background-image: var(--ui-gold); }
+#ui:not(.desktop) .ctx-btn.stomp { background-image: var(--ui-stone); }
+#ui:not(.desktop) .ctx-btn.march { background-image: var(--ui-blue); }
+#ui:not(.desktop) .ctx-btn.map { background-image: var(--ui-stone); }
+
+#ui:not(.desktop) .ctx-btn img {
+  width: 44%;
+  height: 44%;
+  margin-top: -12%;
+}
+
+#ui:not(.desktop) .ctx-btn span {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  /* (A narrow face where there is one: "MARCHAR" or "BERANGKAT" under a thumb-sized button.) */
+  font-family: "Arial Narrow", "Liberation Sans Narrow", "Avenir Next Condensed", "Roboto Condensed", sans-serif-condensed, "DejaVu Sans Condensed", "Trebuchet MS", Verdana, system-ui, sans-serif;
+  font-stretch: condensed;
+  font-size: 12px;
+  line-height: 14px;
+  white-space: nowrap;
+  letter-spacing: 0;
+  color: #fff;
+  background: rgba(12, 12, 16, 0.62);
+  border-radius: 3px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+#ui:not(.desktop) .slot.craft {
+  background: var(--ui-bag) center / 100% 100% no-repeat;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+/* ---------------- a phone's view: everything a size down, so the world keeps the screen ---------------- */
+
+/* Hearts and hunger over a thinner experience bar. */
+#ui:not(.desktop) #vitals {
+  gap: 2px;
+}
+
+#ui:not(.desktop) #vitals .xp {
+  height: 6px;
+}
+
+#ui:not(.desktop) #vitals .xpbar {
+  top: 1px;
+  height: 4px;
+}
+
+#ui:not(.desktop) #vitals .xp b {
+  top: -8px;
+  font-size: 12px;
+}
+
+/* Speech: smaller bubbles (a short line, then they go). */
+#ui:not(.desktop) #bubbles .bubble {
+  max-width: 150px;
+  padding: 3px 8px 4px;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1.5px #2a2218, 0 2px 0 1px rgba(0, 0, 0, 0.25);
+}
+
+#ui:not(.desktop) #bubbles .bubble.shout {
+  font-size: 12px;
+}
+
+#ui:not(.desktop) #bubbles .bubble.cheer {
+  font-size: 13px;
+}
+
+/* The marker over the spot. */
+#ui:not(.desktop) #coach-mark .m-label {
+  gap: 4px;
+  padding: 1px 6px 2px;
+  font-size: 12px;
+  box-shadow: 0 0 0 1.5px #1a1408, 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+#ui:not(.desktop) #coach-mark .m-dist {
+  font-size: 11px;
+}
+
+#ui:not(.desktop) #coach-mark .m-arrow {
+  width: 16px;
+  height: 11px;
+}
+
+/* Names over the fortress's parts. */
+#ui:not(.desktop) #part-labels .plabel {
+  padding: 1px 5px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  background: rgba(10, 8, 6, 0.55);
+}
+
+/* A feat earned: one slim card. */
+#ui:not(.desktop) #feat-pop {
+  gap: 6px;
+  padding: 3px 8px 4px 4px;
+}
+
+#ui:not(.desktop) #feat-pop img {
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+}
+
+#ui:not(.desktop) #feat-pop b {
+  font-size: 13px;
+}
+
+#ui:not(.desktop) #feat-pop span {
+  font-size: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* (A phone held sideways: its name only, the rest is in the pause menu's list.) */
+#ui.short:not(.desktop) #feat-pop span {
+  display: none;
+}
+
+/* Tips, briefings and news. */
+#ui:not(.desktop) #tip {
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  line-height: 1.28;
+}
+
+#ui.short:not(.desktop) #tip {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+#ui:not(.desktop) #tip b {
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+#ui:not(.desktop) #brief {
+  padding: 6px 10px 6px;
+}
+
+#ui:not(.desktop) #brief .btitle {
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+#ui:not(.desktop) #brief .bsub,
+#ui:not(.desktop) #brief ul {
+  font-size: 13px;
+}
+
+#ui:not(.desktop) #brief ul {
+  margin-top: 4px;
+  gap: 3px;
+}
+
+#ui:not(.desktop) #brief .bfoot {
+  display: none;
+}
+
+#ui:not(.desktop) .toast {
+  padding: 2px 8px 2px 5px;
+  font-size: 12px;
+}
+
+#ui:not(.desktop) .toast.held img {
+  width: 22px;
+  height: 22px;
+}
+
+#ui:not(.desktop) .toast.held b {
+  font-size: 12px;
+}
+
+#ui:not(.desktop) #banner .title {
+  font-size: 24px;
+  letter-spacing: 1.5px;
+}
+
+#ui:not(.desktop) #banner .sub {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+/* A level up: a smaller rise. */
+#ui:not(.desktop) .lvl-pop b {
+  font-size: 18px;
+}
+
+#ui:not(.desktop) .lvl-pop span {
+  padding: 1px 6px;
+  font-size: 12px;
+}
+
+/* A step done: a smaller stamp. */
+#ui:not(.desktop) #coach-stamp .s-in {
+  gap: 6px;
+  padding: 4px 11px;
+  font-size: 17px;
+}
+
+#ui:not(.desktop) #coach-stamp .s-in b {
+  font-size: 19px;
+}
+
+
+/* ---------------- the journal's tabs, the cabinet ---------------- */
+
+.jr-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 8px 6px;
+}
+
+.jr-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 2px;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.jr-tab.on {
+  background: linear-gradient(180deg, #e7b72e 0%, #a87610 100%);
+}
+
+.jr-relic.now {
+  box-shadow: inset 0 0 0 2px #e7b72e;
+}
+
+.jr-relic img.jr-face {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  image-rendering: auto;
+  box-shadow: 0 0 0 1px #b8913f;
+}
+
+.jr-relic img.jr-face.dark {
+  filter: brightness(0.12) saturate(0);
+}
+
+.jr-goal {
+  margin: 2px 0 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.3;
+  color: #fff3d8;
+  background: rgba(231, 183, 46, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(231, 183, 46, 0.6);
+}
+
+.jr-goal b {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #ffd25a;
+}
+
+.cu-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cu-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 3px 1px;
+  background: rgba(70, 44, 16, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(70, 44, 16, 0.3);
+}
+
+.cu-cell img {
+  width: 44px;
+  height: 44px;
+  image-rendering: auto;
+}
+
+.cu-cell small {
+  font-size: 10px;
+  line-height: 1.1;
+  text-align: center;
+  color: #3e2a14;
+  overflow-wrap: anywhere;
+}
+
+.cu-cell.missing {
+  min-height: 56px;
+  justify-content: center;
+  opacity: 0.45;
+}
+
+.cu-cell.missing i {
+  font-style: normal;
+  font-size: 22px;
+  color: #6a5230;
+}
+
+/* ================= Iron and brass: the menus in the title screen's own dress =================
+   Dark riveted steel panels with a brass hairline, the same buttons as the title, dark wells for
+   the rows. (Last in the file: these win over the plain grey panels above.) */
+
+.modal-backdrop {
+  background: radial-gradient(ellipse at 50% 45%, rgba(6, 8, 12, 0.5) 0%, rgba(4, 5, 8, 0.84) 100%);
+}
+
+.modal {
+  background-color: #262b30;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #353c43 0%, #282d33 36%, #1d2126 100%);
+  background-size: 48px 48px, 100% 100%;
+  color: #ece3cc;
+  box-shadow:
+    inset 0 0 0 2px #0b0d0f,
+    inset 0 0 0 5px #5f686f,
+    inset 0 0 0 6px #121518,
+    inset 0 0 0 7px rgba(226, 178, 74, 0.55),
+    0 12px 30px rgba(0, 0, 0, 0.55);
+  animation: modal-in 0.18s ease-out;
+}
+
+/* Brass rivets on the steel band's corners. */
+.modal::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left top / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right top / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left bottom / 6px 6px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right bottom / 6px 6px no-repeat;
+}
+
+@keyframes modal-in {
+  0% { opacity: 0; transform: scale(0.97); }
+  100% { opacity: 1; transform: none; }
+}
+
+.modal h2 {
+  margin: 0 8px 6px;
+  padding: 10px 4px 7px 6px;
+  color: #ffe3a0;
+  text-shadow: 0 2px 0 #000, 0 0 14px rgba(255, 196, 90, 0.22);
+  border-bottom: 1px solid rgba(226, 178, 74, 0.3);
+}
+
+#ui.narrow .modal h2 {
+  padding: 8px 2px 6px 4px;
+}
+
+/* Buttons: the title's, riveted rims left out (there are many of them). */
+.modal .stone,
+.story-card .stone {
+  border-radius: 2px;
+  background-color: #5d666d;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #8f999f 0%, #6e777e 44%, #5a636a 58%, #424a51 100%);
+  background-size: 48px 48px, 100% 100%;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 2px #0d1013,
+    0 3px 0 2px rgba(0, 0, 0, 0.32);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  transition: transform 0.07s ease, filter 0.07s ease;
+}
+
+.modal .stone:active,
+.modal .stone.pressed,
+.story-card .stone:active {
+  transform: translateY(1px);
+  filter: brightness(0.9);
+}
+
+.modal .big-btn.green,
+.story-card .big-btn.green {
+  background-color: #4aa52c;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #8de25f 0%, #5fbf38 42%, #48a428 58%, #2f8019 100%);
+}
+
+.modal .big-btn.gold {
+  background-color: #c8901a;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #ffd96e 0%, #e3a92a 42%, #c88d16 58%, #8f5c08 100%);
+}
+
+.modal .big-btn.sky {
+  background-color: #2f6fd0;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #74bdff 0%, #4590e8 42%, #3074d2 58%, #1d4fa3 100%);
+}
+
+.modal .big-btn.red {
+  background-color: #b8382a;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #ff8b76 0%, #dc4d39 42%, #c03826 58%, #861c10 100%);
+}
+
+.modal .big-btn.sky.ok {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 2px #0d1013,
+    0 0 0 4px rgba(140, 230, 120, 0.85);
+}
+
+.modal .close {
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #6f787f 0%, #4b535a 55%, #353c42 100%);
+  color: #ffe3a0;
+}
+
+/* Rows: dark wells sunk into the steel. */
+.modal .recipe,
+.modal .trade,
+.modal .dest,
+.modal .ft-row:not(.done),
+#village-modal .quest-box,
+#guide-modal .gsec {
+  background: linear-gradient(180deg, rgba(8, 10, 12, 0.6) 0%, rgba(8, 10, 12, 0.42) 100%);
+  box-shadow:
+    inset 0 0 0 1px #050607,
+    inset 0 1px 0 1px rgba(255, 255, 255, 0.04),
+    0 1px 0 rgba(255, 255, 255, 0.07);
+  color: #efe6cf;
+  text-shadow: 0 1px 0 #000;
+}
+
+.modal .ft-row.done {
+  box-shadow: inset 0 0 0 1px #3a2704, inset 0 2px 0 1px rgba(255, 233, 160, 0.45), 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.modal .recipe .out {
+  background: #0d0f11;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #2b3137;
+}
+
+.modal .recipe .info small,
+.modal .trade .info small,
+.modal .dest .info small,
+#village-modal .quest-box small {
+  color: #bdb4a0;
+}
+
+.modal .section-label {
+  color: #e2b24a;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 0 #000;
+}
+
+.modal .help,
+#feats-modal .help {
+  color: #d9d0bb;
+}
+
+.modal .stations span {
+  background: #3b434a;
+  box-shadow: inset 0 0 0 1px #0d1013;
+  text-shadow: 0 1px 0 #000;
+}
+
+.modal .stations span.on {
+  background: #3f7d2a;
+}
+
+.modal .elder {
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(226, 178, 74, 0.22);
+}
+
+.modal .elder p,
+#village-modal .trust {
+  color: #e6dcc4;
+}
+
+#village-modal .trust.ok {
+  color: #8fe36a;
+}
+
+/* Cloud saves and co-op. */
+#cloud-modal {
+  color: #e6dcc4;
+}
+
+.modal .cloud-status {
+  background: rgba(8, 10, 12, 0.5);
+  box-shadow: inset 0 0 0 1px #050607, 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.modal .cloud-status.ok {
+  background: rgba(70, 150, 50, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(140, 230, 110, 0.5);
+}
+
+.modal .cloud-status.warn {
+  background: rgba(200, 140, 40, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 200, 110, 0.5);
+}
+
+.modal .cloud-status b {
+  color: #efe6cf;
+}
+
+.modal .cloud-status small {
+  color: #bdb4a0;
+}
+
+.modal .cloud-code {
+  color: #ffe3a0;
+  background: #0e1114;
+  box-shadow: inset 0 0 0 1px #000, 0 0 0 2px #4590e8;
+  text-shadow: 0 0 10px rgba(255, 210, 120, 0.35);
+}
+
+.modal .cloud-note {
+  color: #ff9f84;
+}
+
+.modal .cloud-found {
+  background: rgba(30, 60, 100, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(116, 189, 255, 0.55);
+}
+
+.modal .cloud-found b {
+  color: #efe6cf;
+}
+
+.modal .cloud-found span {
+  color: #b9c8d8;
+}
+
+#coop-modal .help b {
+  color: #ffe3a0;
+}
+
+/* The map's words under the chart. */
+#map-modal .map-status {
+  color: #e6dcc4;
+}
+
+#map-modal .ms-note {
+  color: #bdb4a0;
+}
+
+/* The tally at the end. */
+.modal .result-title.victory {
+  color: #a6f07a;
+  text-shadow: 0 3px 0 #0b2a06, 0 0 18px rgba(150, 240, 100, 0.45);
+}
+
+.modal .result-title.defeat {
+  color: #ff6a4c;
+  text-shadow: 0 3px 0 #2a0804, 0 0 18px rgba(255, 90, 60, 0.45);
+}
+
+.modal .result-sub {
+  color: #d6ccb6;
+}
+
+.modal .stats-grid span {
+  color: #cfc6b0;
+}
+
+.modal .stats-grid b {
+  color: #ffe3a0;
+}
+
+/* The journal stays a parchment book, bound in the same steel. */
+#journal-modal {
+  background-color: #dcc896;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #ecdcac 0%, #d9c38e 100%);
+  background-size: 48px 48px, 100% 100%;
+  color: #3e2a14;
+}
+
+#journal-modal h2 {
+  color: #4a2e10;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  border-bottom-color: rgba(90, 60, 20, 0.35);
+}
+
+#journal-modal .section-label {
+  color: #6a4a1e;
+  text-shadow: none;
+}
+
+/* Scrollbars that belong on steel (where the system shows them). */
+.modal .scroll,
+#cloud-modal,
+#coop-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #6f787f rgba(0, 0, 0, 0.25);
+}
+
+/* (Inside the parchment journal the words stay ink.) */
+#journal-modal .help {
+  color: #4a3216;
+}
+
+/* The open tab of the journal, in brass. */
+.modal .jr-tab.on {
+  background-color: #c8901a;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #ffd96e 0%, #e3a92a 42%, #c88d16 58%, #8f5c08 100%);
+}
+
+/* Buying is green, marching off is blue (as before the steel, in the title's colours). */
+.modal .trade .trade-btn {
+  background-color: #3c9a2a;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #7fd65a 0%, #4fae34 42%, #3c9a26 58%, #256f16 100%);
+}
+
+.modal .dest .dest-btn {
+  background-color: #3a47b0;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #8a96f0 0%, #5a68d2 42%, #4553bd 58%, #2a3388 100%);
+}
+
+/* The tally's moment: the picture settles slowly, the verdict lands on it. */
+#result-modal .result-art {
+  animation: result-art-in 9s ease-out both;
+}
+
+#result-modal .result-title {
+  animation: result-slam 0.55s cubic-bezier(0.2, 1.5, 0.4, 1) 0.15s both;
+}
+
+@keyframes result-art-in {
+  0% { transform: scale(1.1); filter: brightness(0.6); }
+  12% { filter: none; }
+  100% { transform: none; }
+}
+
+@keyframes result-slam {
+  0% { opacity: 0; transform: scale(1.6); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* Short (landscape) screens: a lower picture, so the verdict and its button fit without a scroll. */
+#ui.short #result-modal .result-art {
+  height: 22vh;
+  height: 22cqh;
+  min-height: 64px;
+}
+
+#ui.short #result-modal .result-art + .result-title {
+  margin-top: -30px;
+}
+
+#ui.short .result-epilogue {
+  margin: 0 10px 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* The pause and view buttons: steel plates with brass rivets, like the menus they open. */
+#hud-pause,
+#hud-view {
+  border-radius: 3px;
+  background-color: #4b535a;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #7d878e 0%, #5d666d 45%, #4a5259 60%, #363d43 100%);
+  background-size: 48px 48px, 100% 100%;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 2px #0d1013,
+    0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+#hud-pause::before,
+#hud-view::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left top / 4px 4px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right top / 4px 4px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left bottom / 4px 4px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right bottom / 4px 4px no-repeat;
+}
+
+/* ================= The crane's gauge =================
+   A steel plate with brass rivets under the crosshair: HEAVE (a needle sweeping toward the gold
+   as the strain comes on) or DROP (a weight swinging either side of a gold mark). The whole plate
+   is the button. */
+#crane-gauge {
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px 9px;
+  border: 0;
+  border-radius: 4px;
+  color: #ffe3a0;
+  font-family: "Lucida Console", "Courier New", Menlo, monospace;
+  cursor: pointer;
+  touch-action: none;
+  background-color: #262b30;
+  background-image: var(--mc-noise, none), linear-gradient(180deg, #3b434a 0%, #2a3036 45%, #1c2025 100%);
+  background-size: 48px 48px, 100% 100%;
+  box-shadow:
+    inset 0 0 0 2px #0b0d0f,
+    inset 0 0 0 4px #5f686f,
+    inset 0 0 0 5px rgba(226, 178, 74, 0.55),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  animation: crane-in 0.18s ease-out;
+}
+
+#crane-gauge::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left top / 5px 5px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right top / 5px 5px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) left bottom / 5px 5px no-repeat,
+    linear-gradient(135deg, #ffe48f, #dba021 55%, #8c5b0b) right bottom / 5px 5px no-repeat;
+}
+
+/* At the crane's controls the gauge takes the hotbar's place (and says what the prompt would). */
+.craning #hotbar,
+.craning #vitals,
+.craning #effects,
+.craning #prompt,
+.craning #tip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.craning #hotbar * {
+  pointer-events: none;
+}
+
+@keyframes crane-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: none; }
+}
+
+#crane-gauge b {
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #fff4cf;
+  text-shadow: 0 2px 0 #000, 0 0 12px rgba(255, 196, 90, 0.35);
+  animation: crane-beat 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes crane-beat {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+#crane-gauge small {
+  font-size: 11px;
+  color: #cfc4a8;
+  text-shadow: 1px 1px 0 #000;
+}
+
+#crane-gauge .cg-bar {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #0d0f12, #1a1e23);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#crane-gauge .cg-gold {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: calc(var(--lo, 0.72) * 100%);
+  width: calc((var(--hi, 0.9) - var(--lo, 0.72)) * 100%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ffe48f, #dba021 60%, #a8740f);
+  box-shadow: 0 0 8px rgba(255, 200, 80, 0.55);
+}
+
+#crane-gauge .cg-mark {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: calc(var(--v, 0) * 100% - 3px);
+  width: 6px;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #000, 0 0 6px rgba(255, 255, 255, 0.7);
+}
+
+/* The strain fills the bar behind the needle as it climbs. */
+#crane-gauge:not(.drop) .cg-bar::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: calc(var(--v, 0) * (100% - 4px));
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(120, 200, 255, 0.25), rgba(255, 120, 60, 0.55));
+}
+
+/* Swinging: a round weight on a short rope instead of a needle. */
+#crane-gauge.drop .cg-mark {
+  top: -3px;
+  bottom: auto;
+  width: 14px;
+  height: 14px;
+  left: calc(var(--v, 0.5) * 100% - 7px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff, #9aa3aa 60%, #4d555c);
+}
+
+/* Over the bar while it swings: the jib's hook (where the stick has trimmed it to)... */
+#crane-gauge .cg-tip {
+  display: none;
+  position: absolute;
+  top: -10px;
+  left: calc(var(--t, 0.5) * 100% - 6px);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #e2b24a;
+  filter: drop-shadow(0 1px 0 #000);
+}
+
+#crane-gauge.drop {
+  gap: 9px;
+}
+
+#crane-gauge.drop .cg-tip {
+  display: block;
+}
+
+/* ...and under it, the time it will still hang there before it is let down anyway. */
+#crane-gauge.drop .cg-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 3px;
+  width: calc(var(--left, 1) * 100%);
+  border-radius: 2px;
+  background: linear-gradient(90deg, #ff7a3a, #ffd24a);
+  opacity: 0.85;
+}
+
+/* A TNT crate on the hook: no bar, the count of monsters in its blast instead. */
+#crane-gauge .cg-count {
+  display: none;
+  font-style: normal;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #ffb070;
+  text-shadow: 0 2px 0 #000;
+}
+
+#crane-gauge.bomb .cg-count {
+  display: block;
+}
+
+#crane-gauge.bomb .cg-bar {
+  display: none;
+}
+
+#crane-gauge.bomb.hot .cg-count {
+  color: #ff6a3a;
+}
+
+/* On the gold: the plate glows, the word goes gold. */
+#crane-gauge.hot {
+  box-shadow:
+    inset 0 0 0 2px #0b0d0f,
+    inset 0 0 0 4px #b98a2a,
+    inset 0 0 0 5px rgba(255, 220, 120, 0.9),
+    0 0 22px rgba(255, 196, 70, 0.65),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+#crane-gauge.hot b {
+  color: #ffd24a;
+}
+
+#crane-gauge.hot .cg-mark {
+  background: #ffd24a;
+}

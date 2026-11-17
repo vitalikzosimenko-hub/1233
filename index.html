@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Captain a blocky walking fortress across seven lands. By day mine, craft, trade and hoist whole village buildings onto your deck with a crane; at night march on while monsters climb the legs and giants attack: fire the cannons, stomp, take the helm. Break six Heart Seals, find the lost Striders and free the Creeper Citadel. Phone (joystick, landscape) or PC (WASD and mouse), solo or co-op, in English, Spanish, Portuguese, Indonesian, Chinese and Hindi." />
+    <link rel="icon" href="data:," />
+    <title>Minecraft: Walking Fortress</title>
+    <style>
+      html,
+      body,
+      #viewport {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      html,
+      body {
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #000;
+      }
+
+      #viewport {
+        --surface-viewport-safe-top: env(safe-area-inset-top, 0px);
+        --surface-viewport-safe-right: env(safe-area-inset-right, 0px);
+        --surface-viewport-safe-bottom: env(safe-area-inset-bottom, 0px);
+        --surface-viewport-safe-left: env(safe-area-inset-left, 0px);
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* A landscape game on an upright screen: the surface lies turned a quarter clockwise across it
+         and the player turns the device on its side (see surface-template.ts). */
+      #viewport.surface-turned {
+        width: 100vh;
+        width: 100dvh;
+        height: 100vw;
+        transform-origin: 0 0;
+        transform: translateX(100vw) rotate(90deg);
+      }
+
+      #app {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        transform-origin: 0 0;
+      }
+
+      :where(#app > canvas) {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      #game-canvas {
+        touch-action: none;
+        image-rendering: pixelated;
+      }
+
+      /* Shown from first paint until the game mounts its own loading screen. */
+      #boot-loading {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #101016;
+        color: #d8d8d8;
+        font: 800 14px "Trebuchet MS", Verdana, "Segoe UI", system-ui, sans-serif;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Fixed brand bumper; host must inject window.combos before this module. -->
+    <script type="module" src="./brand-entry.ts"></script>
+    <div id="viewport">
+      <div id="app"></div>
+      <div id="boot-loading">Loading...</div>
+    </div>
+
+  </body>
+</html>
