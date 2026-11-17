@@ -1,0 +1,15 @@
+{
+  "entry_point": "index.ts",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": [],
+  "bindings": [
+    { "name": "ROOMS", "class_name": "CoopRoom" },
+    { "name": "VAULT", "class_name": "SaveVault" }
+  ],
+  "variables": {
+    "SEAT_GRACE_MS": "60000",
+    "HOST_GRACE_MS": "90000",
+    "EMPTY_ROOM_TTL_MS": "600000",
+    "IDLE_MS": "30000"
+  }
+}

@@ -1,0 +1,18 @@
+include:
+  - local: "src/game_templates/_ci/template.gitlab-ci.yml"
+
+variables:
+  APPS: "template_mobile_portrait_empty"
+  DEPLOY_ENABLED: "true"
+  TEMPLATE_NAME: "mobile_portrait_empty"
+  TEMPLATE_DIR: "src/game_templates/mobile_portrait_empty"
+
+workflow:
+  name: '$GAME_CI_PIPELINE_PREFIX template:mobile_portrait_empty'
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+    - if: '$GAME_CI_EVENT == "GAME_CI_EVENT_MERGE_REQUEST_TO_MAIN"'
+    - if: '$GAME_CI_EVENT == "GAME_CI_EVENT_COMMIT_ON_MAIN"'
+    - if: '$GAME_CI_EVENT == "GAME_CI_EVENT_RDM_DEPLOY"'
+    - if: '$GAME_CI_EVENT == "GAME_CI_EVENT_PROD_DEPLOY"'
+    - when: never
